@@ -15,5 +15,7 @@ namespace AdminWebPage.Data
         }
 
         public DbSet<AdminWebPage.Models.Account> Account { get; set; } = default!;
+        public DbSet<Attendance> Attendances { get; set; }
+
     }
 }

@@ -1,0 +1,35 @@
+﻿@model List<AdminWebPage.Models.AttendanceReportViewModel>
+@{
+    ViewBag.Title = ViewBag.ReportType + " Attendance Report";
+}
+
+<h2>@ViewBag.ReportType Attendance Report</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Total Students</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Late</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                <td>@item.TotalStudents</td>
+                <td>@item.PresentCount</td>
+                <td>@item.AbsentCount</td>
+                <td>@item.LateCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    <a class="btn btn-primary" asp-action="Reports" asp-route-type="Daily">Daily</a>
+    <a class="btn btn-secondary" asp-action="Reports" asp-route-type="Weekly">Weekly</a>
+</div>

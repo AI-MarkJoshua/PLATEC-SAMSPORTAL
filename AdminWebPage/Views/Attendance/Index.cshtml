@@ -1,0 +1,28 @@
+﻿@model List<AdminWebPage.Models.Account>
+
+<h2>Mark Attendance</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Mark</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model)
+        {
+            <tr>
+                <td>@student.FName @student.LName</td>
+                <td>
+                    <form asp-action="Mark" method="post" style="display:inline">
+                        <input type="hidden" name="studentId" value="@student.AccountID" />
+                        <button type="submit" name="status" value="Present" class="btn btn-success">Present</button>
+                        <button type="submit" name="status" value="Absent" class="btn btn-danger">Absent</button>
+                        <button type="submit" name="status" value="Late" class="btn btn-warning">Late</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
