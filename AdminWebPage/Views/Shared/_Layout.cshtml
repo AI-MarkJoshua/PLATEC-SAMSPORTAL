@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AdminWebPage</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AdminWebPage.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="d-flex" style="min-height: 100vh">
+
+        <!-- SIDEBAR -->
+        <aside class="bg-light border-end p-3" style="width: 250px;">
+            <h4 class="text-center mb-4">AdminWebPage</h4>
+
+            <ul class="nav nav-pills flex-column gap-2">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Accounts" asp-action="Index">
+                        Accounts
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Privacy">
+                        Privacy
+                    </a>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a class="nav-link text-danger" asp-controller="Auth" asp-action="Logout">
+                        Logout
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-grow-1">
+            <main class="p-4">
+                @RenderBody()
+            </main>
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
