@@ -8,38 +8,70 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AdminWebPage.styles.css" asp-append-version="true" />
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="d-flex" style="min-height: 100vh">
 
         <!-- SIDEBAR -->
-        <aside class="bg-light border-end p-3" style="width: 250px;">
-            <h4 class="text-center mb-4">AdminWebPage</h4>
+        <aside class="sidebar bg-light border-end d-flex flex-column p-3" style="width: 280px;">
 
-            <ul class="nav nav-pills flex-column gap-2">
+            <!-- LOGO -->
+            <div class="text-center mb-4">
+                <img src="~/image/MKMlonglogo.png"
+                     alt="mkalonglogo"
+                     class="img-fluid"
+                     style="max-height: 80px;">
+            </div>
+
+            <!-- NAV LINKS -->
+            <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Accounts" asp-action="Index">
+                    <a class="nav-link d-flex align-items-center gap-3
+   @(ViewContext.RouteData.Values["controller"]?.ToString() == "Accounts" ? "active" : "")"
+                       asp-controller="Accounts" asp-action="Index">
+                        <i class="bi bi-people fs-4"></i>
                         Accounts
                     </a>
+
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Attendance" asp-action="Index">
+                    <a class="nav-link d-flex align-items-center gap-3
+   @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" &&
+     ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                       asp-controller="Attendance" asp-action="Index">
+                        <i class="bi bi-calendar-check fs-4"></i>
                         Attendance
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Attendance" asp-action="Reports">
-                        Attendance Reports
-                    </a>
+
                 </li>
 
-                <li class="nav-item mt-3">
-                    <a class="nav-link text-danger" asp-controller="Auth" asp-action="Logout">
-                        Logout
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-3
+   @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" &&
+     ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")"
+                       asp-controller="Attendance" asp-action="Reports">
+                        <i class="bi bi-file-earmark-text fs-4"></i>
+                        Attendance Reports
                     </a>
+
                 </li>
             </ul>
+
+            <!-- LOGOUT -->
+            <div>
+                <a class="nav-link d-flex align-items-center gap-3 text-danger" asp-controller="Auth" asp-action="Logout">
+                    <i class="bi bi-box-arrow-right fs-4"></i>
+                    Logout
+                </a>
+            </div>
+
         </aside>
 
         <!-- MAIN CONTENT -->

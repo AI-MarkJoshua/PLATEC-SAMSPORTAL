@@ -21,5 +21,36 @@ body {
   margin-bottom: 60px;
 }
 
+/* Use Inter font */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+
+/* Sidebar nav links */
+.sidebar .nav-link {
+    font-weight: 600;
+    color: #6c757d;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+    /* Icons follow text color */
+    .sidebar .nav-link i {
+        color: inherit;
+    }
+
+    /* Hover */
+    .sidebar .nav-link:hover {
+        background-color: #20274a;
+        color: #ffffff;
+    }
+
+    /* ACTIVE page */
+    .sidebar .nav-link.active {
+        background-color: #20274a !important;
+        color: #ffffff !important;
+    }
+
 
 
