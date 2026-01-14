@@ -3,33 +3,51 @@
     ViewBag.Title = ViewBag.ReportType + " Attendance Report";
 }
 
-<h2>@ViewBag.ReportType Attendance Report</h2>
+<h2>Attendance Report</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Total Students</th>
-            <th>Present</th>
-            <th>Absent</th>
-            <th>Late</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<form method="get" class="row g-3">
+    <div class="col-md-4">
+        <label>Start Date</label>
+        <input type="date" name="startDate" class="form-control" required />
+    </div>
+
+    <div class="col-md-4">
+        <label>End Date</label>
+        <input type="date" name="endDate" class="form-control" required />
+    </div>
+
+    <div class="col-md-4 align-self-end">
+        <button type="submit" class="btn btn-primary">Generate Report</button>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                <td>@item.Date.ToString("yyyy-MM-dd")</td>
-                <td>@item.TotalStudents</td>
-                <td>@item.PresentCount</td>
-                <td>@item.AbsentCount</td>
-                <td>@item.LateCount</td>
+                <th>Date</th>
+                <th>Total Students</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
             </tr>
-        }
-    </tbody>
-</table>
-
-<div>
-    <a class="btn btn-primary" asp-action="Reports" asp-route-type="Daily">Daily</a>
-    <a class="btn btn-secondary" asp-action="Reports" asp-route-type="Weekly">Weekly</a>
-</div>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@item.TotalStudents</td>
+                    <td>@item.PresentCount</td>
+                    <td>@item.AbsentCount</td>
+                    <td>@item.LateCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted">Please select a date range to view the report.</p>
+}

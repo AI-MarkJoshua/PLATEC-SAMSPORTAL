@@ -16,22 +16,29 @@ namespace AdminWebPage.Controllers
             _context = context;
         }
         // GET: Attendance
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(DateTime? selectedDate)
         {
+            ViewBag.SelectedDate = selectedDate;
+
+            if (selectedDate == null)
+            {
+                return View(new List<Account>());
+            }
+
             var students = await _context.Account
                 .Where(a => a.Role == "Student")
                 .ToListAsync();
+
             return View(students);
         }
 
+
         // POST: Attendance/Mark
         [HttpPost]
-        public async Task<IActionResult> Mark(int studentId, string status)
+        public async Task<IActionResult> Mark(int studentId, string status, DateTime date)
         {
-            var today = DateTime.Now.Date;
-
             var existing = await _context.Attendances
-                .FirstOrDefaultAsync(a => a.StudentId == studentId && a.Date == today);
+                .FirstOrDefaultAsync(a => a.StudentId == studentId && a.Date == date);
 
             if (existing != null)
             {
@@ -43,64 +50,47 @@ namespace AdminWebPage.Controllers
                 var attendance = new Attendance
                 {
                     StudentId = studentId,
-                    Date = today,
+                    Date = date,
                     Status = status
                 };
                 _context.Add(attendance);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { selectedDate = date });
         }
 
-        public async Task<IActionResult> Reports(string type = "Daily")
-        {
-            var today = DateTime.Now.Date;
-            List<AttendanceReportViewModel> reportData = new List<AttendanceReportViewModel>();
 
-            if (type == "Daily")
+        public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate)
+        {
+            var reportData = new List<AttendanceReportViewModel>();
+
+            if (startDate == null || endDate == null)
+            {
+                return View(reportData);
+            }
+
+            for (var date = startDate.Value; date <= endDate.Value; date = date.AddDays(1))
             {
                 var dailyAttendance = await _context.Attendances
-                    .Where(a => a.Date == today)
+                    .Where(a => a.Date == date)
                     .ToListAsync();
 
                 reportData.Add(new AttendanceReportViewModel
                 {
-                    Date = today,
+                    Date = date,
                     TotalStudents = await _context.Account.CountAsync(a => a.Role == "Student"),
                     PresentCount = dailyAttendance.Count(a => a.Status == "Present"),
                     AbsentCount = dailyAttendance.Count(a => a.Status == "Absent"),
                     LateCount = dailyAttendance.Count(a => a.Status == "Late"),
-                    ReportType = "Daily"
                 });
             }
-            else if (type == "Weekly")
-            {
-                // Assuming week starts on Monday
-                var diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-                var weekStart = today.AddDays(-1 * diff);
-                var weekEnd = weekStart.AddDays(6);
 
-                for (var date = weekStart; date <= weekEnd; date = date.AddDays(1))
-                {
-                    var dailyAttendance = await _context.Attendances
-                        .Where(a => a.Date == date)
-                        .ToListAsync();
+            ViewBag.StartDate = startDate;
+            ViewBag.EndDate = endDate;
 
-                    reportData.Add(new AttendanceReportViewModel
-                    {
-                        Date = date,
-                        TotalStudents = await _context.Account.CountAsync(a => a.Role == "Student"),
-                        PresentCount = dailyAttendance.Count(a => a.Status == "Present"),
-                        AbsentCount = dailyAttendance.Count(a => a.Status == "Absent"),
-                        LateCount = dailyAttendance.Count(a => a.Status == "Late"),
-                        ReportType = "Weekly"
-                    });
-                }
-            }
-
-            ViewBag.ReportType = type;
             return View(reportData);
         }
+
     }
 }

@@ -2,27 +2,42 @@
 
 <h2>Mark Attendance</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Student</th>
-            <th>Mark</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var student in Model)
-        {
+<form method="get">
+    <label>Select Attendance Date:</label>
+    <input type="date" name="selectedDate" value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")" required />
+    <button type="submit" class="btn btn-primary">Load Students</button>
+</form>
+
+@if (ViewBag.SelectedDate != null && Model.Any())
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td>@student.FName @student.LName</td>
-                <td>
-                    <form asp-action="Mark" method="post" style="display:inline">
-                        <input type="hidden" name="studentId" value="@student.AccountID" />
-                        <button type="submit" name="status" value="Present" class="btn btn-success">Present</button>
-                        <button type="submit" name="status" value="Absent" class="btn btn-danger">Absent</button>
-                        <button type="submit" name="status" value="Late" class="btn btn-warning">Late</button>
-                    </form>
-                </td>
+                <th>Student</th>
+                <th>Mark</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var student in Model)
+            {
+                <tr>
+                    <td>@student.FName @student.LName</td>
+                    <td>
+                        <form asp-action="Mark" method="post" style="display:inline">
+                            <input type="hidden" name="studentId" value="@student.AccountID" />
+                            <input type="hidden" name="date" value="@ViewBag.SelectedDate.ToString("yyyy-MM-dd")" />
+
+                            <button type="submit" name="status" value="Present" class="btn btn-success">Present</button>
+                            <button type="submit" name="status" value="Absent" class="btn btn-danger">Absent</button>
+                            <button type="submit" name="status" value="Late" class="btn btn-warning">Late</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted">Please select a date to show students.</p>
+}

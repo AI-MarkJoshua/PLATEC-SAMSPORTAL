@@ -20,7 +20,7 @@ namespace AdminWebPage.Controllers
         }
 
         // GET: Accounts
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string role)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             if (userRole != "Teacher")
@@ -29,8 +29,60 @@ namespace AdminWebPage.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            return View(await _context.Account.ToListAsync());
+            var accounts = _context.Account.AsQueryable();
+
+            // 🔍 Search by name (FName, MName, LName)
+            if (!string.IsNullOrEmpty(search))
+            {
+                accounts = accounts.Where(a =>
+                    a.FName.Contains(search) ||
+                    a.MName.Contains(search) ||
+                    a.LName.Contains(search));
+            }
+
+            // 🎯 Filter by role
+            if (!string.IsNullOrEmpty(role))
+            {
+                accounts = accounts.Where(a => a.Role == role);
+            }
+
+            ViewBag.Search = search;
+            ViewBag.Role = role;
+
+            return View(await accounts.ToListAsync());
         }
+
+        // GET: Accounts/Search
+        public async Task<IActionResult> Search(string search, string role)
+        {
+            var accounts = _context.Account.AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                accounts = accounts.Where(a =>
+                    a.FName.Contains(search) ||
+                    a.MName.Contains(search) ||
+                    a.LName.Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(role))
+            {
+                accounts = accounts.Where(a => a.Role == role);
+            }
+
+            var result = await accounts.Select(a => new
+            {
+                a.AccountID,
+                a.FName,
+                a.MName,
+                a.LName,
+                a.Email,
+                a.Role
+            }).ToListAsync();
+
+            return Json(result);
+        }
+
 
 
         // GET: Accounts/Details/5
