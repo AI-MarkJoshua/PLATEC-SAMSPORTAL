@@ -1,13 +1,31 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/css/site.css" />
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            background-image: url('/image/mkmbackground.jpg'); /* ✅ FIXED */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        @RenderBody()
-    </div>
+
+    @RenderBody()
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

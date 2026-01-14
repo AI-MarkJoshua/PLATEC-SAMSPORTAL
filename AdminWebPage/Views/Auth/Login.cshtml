@@ -4,33 +4,109 @@
 
 @model AdminWebPage.Models.LoginViewModel
 
-<h2>Login</h2>
+<style>
+    /* Login Button Styles */
+    .login-btn {
+        background-color: #181F49;
+        color: white;
+        font-size: 1.3rem;
+        transition: background-color 0.3s ease;
+    }
 
-@if (ViewBag.Error != null)
-{
-    <div class="alert alert-danger">
-        @ViewBag.Error
+        .login-btn:hover {
+            background-color: #292b38;
+            color: white;
+        }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100"
+     style="background-color: rgba(255,255,255,0.2);">
+
+    <div class="card shadow-lg overflow-hidden"
+         style="
+        width: 1230px;
+        border-radius: 30px;
+        border: 10px solid rgba(255,255,255,0.9);
+        background-color: rgba(255,255,255,0.95);
+     ">
+
+        <div class="row g-0" style="min-height: 700px;">
+
+            <!-- LEFT PANEL -->
+            <div class="col-md-6 position-relative"
+                 style="
+                    background-image: url('/image/mkmbackground.jpg');
+                    background-size: cover;
+                    background-position: center;
+                 ">
+
+                <!-- TOP-LEFT LOGO -->
+                <div class="position-absolute top-0 start-0 p-4">
+                    <img src="~/image/mkmlonglogo.png"
+                         alt="MKM Long Logo"
+                         style="max-width: 220px; height: auto;" />
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="col-md-6 p-5 d-flex align-items-center">
+
+                <div class="w-100 d-flex flex-column">
+
+                    <!-- CENTER TEXT -->
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Log in to your account</h2>
+                        <p class="text-muted fs-5">
+                            This system is intended for authorized administrators and teachers.
+                            Student login access is not permitted.
+                        </p>
+                    </div>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger text-center">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger text-center">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <form asp-action="Login" method="post" class="d-flex flex-column h-100">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold fs-5">Email</label>
+                            <input asp-for="Email"
+                                   class="form-control form-control-lg"
+                                   style="height: 55px; font-size: 1.2rem; padding: 0.75rem;"
+                                   placeholder="Enter your email" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold fs-5">Password</label>
+                            <input asp-for="Password"
+                                   type="password"
+                                   class="form-control form-control-lg"
+                                   style="height: 55px; font-size: 1.2rem; padding: 0.75rem;"
+                                   placeholder="Enter your password" />
+                        </div>
+
+                        <!-- Spacer to push button lower -->
+                        <div class="mt-auto">
+                            <button type="submit" class="btn w-100 py-3 fw-bold login-btn">
+                                Login
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
     </div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
-
-
-<form asp-action="Login" method="post">
-    <div>
-        <label>Email</label>
-        <input asp-for="Email" />
-    </div>
-
-    <div>
-        <label>Password</label>
-        <input asp-for="Password" type="password" />
-    </div>
-
-    <button type="submit">Login</button>
-</form>
+</div>
