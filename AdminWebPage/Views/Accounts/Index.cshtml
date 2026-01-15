@@ -45,95 +45,100 @@
     </div>
 </form>
 
-<table class="table table-striped table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>First Name</th>
-            <th>Middle Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th style="width:180px">Actions</th>
-        </tr>
-    </thead>
-    <tbody id="accountTableBody">
-        @foreach (var item in Model)
-        {
+<div class="bg-white p-3 rounded shadow-sm">
+    <table class="table table-striped table-bordered mb-0">
+        <thead class="table-dark">
             <tr>
-                <td>@item.FName</td>
-                <td>@item.MName</td>
-                <td>@item.LName</td>
-                <td>@item.Email</td>
-                <td>
-                    <span class="badge @(item.Role == "Teacher" ? "bg-primary" : "bg-secondary")">
-                        @item.Role
-                    </span>
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.AccountID" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Details" asp-route-id="@item.AccountID" class="btn btn-sm btn-info">Details</a>
-                    <a asp-action="Delete" asp-route-id="@item.AccountID" class="btn btn-sm btn-danger">Delete</a>
-                </td>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th style="width:180px">Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
-
-@section Scripts {
-<script>
-    const searchBox = document.getElementById('searchBox');
-    const roleFilter = document.getElementById('roleFilter');
-    const tableBody = document.getElementById('accountTableBody');
-
-    // 🔹 Debounce function
-    function debounce(fn, delay) {
-        let timeout;
-        return function () {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => fn.apply(this, arguments), delay);
-        };
-    }
-
-    async function fetchAccounts() {
-        const search = searchBox.value;
-        const role = roleFilter.value;
-
-        const url = '@Url.Action("Search", "Accounts")' + `?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`;
-        const response = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        const data = await response.json();
-
-        tableBody.innerHTML = '';
-
-        if (!data || data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No accounts found.</td></tr>`;
-            return;
-        }
-
-        data.forEach(account => {
-            tableBody.innerHTML += `
+        </thead>
+        <tbody id="accountTableBody">
+            @foreach (var item in Model)
+            {
                 <tr>
-                    <td>${account.FName}</td>
-                    <td>${account.MName}</td>
-                    <td>${account.LName}</td>
-                    <td>${account.Email}</td>
+                    <td>@item.FName</td>
+                    <td>@item.MName</td>
+                    <td>@item.LName</td>
+                    <td>@item.Email</td>
                     <td>
-                        <span class="badge ${account.Role === 'Teacher' ? 'bg-primary' : 'bg-secondary'}">
-                            ${account.Role}
+                        <span class="badge @(item.Role == "Teacher" ? "bg-primary" : "bg-secondary")">
+                            @item.Role
                         </span>
                     </td>
                     <td>
-                        <a href='@Url.Action("Edit", "Accounts")/${account.AccountID}' class="btn btn-sm btn-warning">Edit</a>
-                        <a href='@Url.Action("Details", "Accounts")/${account.AccountID}' class="btn btn-sm btn-info">Details</a>
-                        <a href='@Url.Action("Delete", "Accounts")/${account.AccountID}' class="btn btn-sm btn-danger">Delete</a>
+                        <a asp-action="Edit" asp-route-id="@item.AccountID" class="btn btn-sm btn-warning">Edit</a>
+@*                         <a asp-action="Details" asp-route-id="@item.AccountID" class="btn btn-sm btn-info">Details</a> *@
+                        <a asp-action="Delete" asp-route-id="@item.AccountID" class="btn btn-sm btn-danger">Delete</a>
                     </td>
-                </tr>`;
-        });
-    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
-    // 🔹 Use debounce so AJAX is not called on every keystroke instantly
-    const debouncedFetch = debounce(fetchAccounts, 300);
+@section Scripts {
+    <script>
+        const searchBox = document.getElementById('searchBox');
+        const roleFilter = document.getElementById('roleFilter');
+        const tableBody = document.getElementById('accountTableBody');
 
-    searchBox.addEventListener('input', debouncedFetch);
-    roleFilter.addEventListener('change', fetchAccounts);
-</script>
+        // 🔹 Debounce function
+        function debounce(fn, delay) {
+            let timeout;
+            return function () {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, arguments), delay);
+            };
+        }
+
+        async function fetchAccounts() {
+            const search = searchBox.value;
+            const role = roleFilter.value;
+
+            const url = '@Url.Action("Search", "Accounts")'
+                + `?search=${encodeURIComponent(search)}&role=${encodeURIComponent(role)}`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            tableBody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML =
+                    `<tr><td colspan="6" class="text-center text-muted">No accounts found.</td></tr>`;
+                return;
+            }
+
+            data.forEach(account => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${account.fName}</td>
+                        <td>${account.mName ?? ''}</td>
+                        <td>${account.lName}</td>
+                        <td>${account.email}</td>
+                        <td>
+                            <span class="badge ${account.role === 'Teacher' ? 'bg-primary' : 'bg-secondary'}">
+                                ${account.role}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/Accounts/Edit/${account.accountID}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="/Accounts/Details/${account.accountID}" class="btn btn-sm btn-info">Details</a>
+                            <a href="/Accounts/Delete/${account.accountID}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>`;
+            });
+        } // ✅ IMPORTANT: function closed correctly
+
+        // 🔹 Use debounce so AJAX is not called on every keystroke instantly
+        const debouncedFetch = debounce(fetchAccounts, 300);
+
+        searchBox.addEventListener('input', debouncedFetch);
+        roleFilter.addEventListener('change', fetchAccounts);
+    </script>
 }

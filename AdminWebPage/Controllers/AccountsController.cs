@@ -60,9 +60,10 @@ namespace AdminWebPage.Controllers
             if (!string.IsNullOrEmpty(search))
             {
                 accounts = accounts.Where(a =>
-                    a.FName.Contains(search) ||
-                    a.MName.Contains(search) ||
-                    a.LName.Contains(search));
+     a.FName.Contains(search) ||
+     (a.MName != null && a.MName.Contains(search)) ||
+     a.LName.Contains(search));
+
             }
 
             if (!string.IsNullOrEmpty(role))
@@ -115,7 +116,7 @@ namespace AdminWebPage.Controllers
         // POST: Accounts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AccountID,FName,MName,LName,Email,Password,Role")] Account account)
+        public async Task<IActionResult> Create([Bind("AccountID,FName,MName,LName,Username,Email,Password,Role")] Account account)
         {
             if (ModelState.IsValid)
             {
@@ -147,7 +148,7 @@ namespace AdminWebPage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("AccountID,FName,MName,LName,Email,Password,Role")] Account account)
+        public async Task<IActionResult> Edit(int id, [Bind("AccountID,FName,MName,LName,Username,Email,Password,Role")] Account account)
         {
             if (id != account.AccountID)
             {

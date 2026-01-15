@@ -79,11 +79,11 @@
 
                     <form asp-action="Login" method="post" class="d-flex flex-column h-100">
                         <div class="mb-3">
-                            <label class="form-label fw-bold fs-5">Email</label>
-                            <input asp-for="Email"
+                            <label class="form-label fw-bold fs-5">Username</label>
+                            <input asp-for="Username"
                                    class="form-control form-control-lg"
-                                   style="height: 55px; font-size: 1.2rem; padding: 0.75rem;"
-                                   placeholder="Enter your email" />
+                                   placeholder="Enter your username" />
+
                         </div>
 
                         <div class="mb-4">
@@ -94,6 +94,12 @@
                                    style="height: 55px; font-size: 1.2rem; padding: 0.75rem;"
                                    placeholder="Enter your password" />
                         </div>
+                        <div class="text-center mt-3">
+                            <a asp-action="ForgotPassword" asp-controller="Auth">
+                                Forgot password?
+                            </a>
+                        </div>
+
 
                         <!-- Spacer to push button lower -->
                         <div class="mt-auto">
