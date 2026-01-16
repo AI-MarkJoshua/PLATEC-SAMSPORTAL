@@ -1,15 +1,83 @@
-﻿<h3>Verify Code</h3>
-
-@if (ViewBag.Error != null)
-{
-    <div class="alert alert-danger">@ViewBag.Error</div>
+﻿@{
+    Layout = "_LoginLayout";
 }
 
-<form method="post">
-    <div class="mb-3">
-        <label>Verification Code</label>
-        <input name="code" class="form-control" placeholder="Enter the code sent to your email" required />
-    </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-    <button class="btn btn-success w-100">Verify</button>
-</form>
+<style>
+    .btn-primary-custom {
+        background-color: #181F49;
+        color: white;
+        font-size: 1.2rem;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary-custom:hover {
+            background-color: #292b38;
+            color: white;
+        }
+
+    .btn-back {
+        background-color: transparent;
+        border: none;
+        color: #181F49;
+        font-size: 1rem;
+        margin-bottom: 15px;
+        cursor: pointer;
+    }
+
+        .btn-back:hover {
+            text-decoration: underline;
+        }
+
+    .page-icon {
+        font-size: 3rem;
+        color: #181F49;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center min-vh-100" style="background-color: rgba(255,255,255,0.2);">
+    <div class="card shadow-lg overflow-hidden" style="width: 1230px; border-radius: 30px; border: 10px solid rgba(255,255,255,0.9); background-color: rgba(255,255,255,0.95);">
+        <div class="row g-0" style="min-height: 700px;">
+
+            <!-- LEFT PANEL -->
+            <div class="col-md-6 position-relative"
+                 style="background-image: url('/image/mkmbackground.jpg'); background-size: cover; background-position: center;">
+                <div class="position-absolute top-0 start-0 p-4">
+                    <img src="~/image/mkmlonglogo.png" alt="MKM Long Logo" style="max-width: 220px; height: auto;" />
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="col-md-6 p-5 d-flex flex-column">
+
+                <!-- BACK BUTTON -->
+                <a asp-action="Login" asp-controller="Auth" class="btn-back">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Login
+                </a>
+
+                <!-- CENTERED CONTENT -->
+                <div class="d-flex flex-column justify-content-center align-items-center flex-grow-1">
+                    <i class="fa-solid fa-circle-check page-icon"></i>
+                    <h2 class="fw-bold">Verify Code</h2>
+                    <p class="text-muted fs-5 text-center">Enter the verification code sent to your email.</p>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger text-center">@ViewBag.Error</div>
+                    }
+
+                    <form method="post" class="d-flex flex-column mt-4 w-75">
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-bold fs-5">Verification Code</label>
+                            <input name="code" class="form-control form-control-lg" placeholder="Enter the code sent to your email" required />
+                        </div>
+
+                        <button type="submit" class="btn w-100 py-3 fw-bold btn-primary-custom mt-3">Verify</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
