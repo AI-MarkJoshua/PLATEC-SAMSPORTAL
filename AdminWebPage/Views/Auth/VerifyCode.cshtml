@@ -1,0 +1,15 @@
+﻿<h3>Verify Code</h3>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">@ViewBag.Error</div>
+}
+
+<form method="post">
+    <div class="mb-3">
+        <label>Verification Code</label>
+        <input name="code" class="form-control" placeholder="Enter the code sent to your email" required />
+    </div>
+
+    <button class="btn btn-success w-100">Verify</button>
+</form>

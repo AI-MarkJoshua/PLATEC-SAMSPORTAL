@@ -125,6 +125,7 @@ namespace AdminWebPage.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(account);
+
         }
 
         // GET: Accounts/Edit/5
@@ -215,5 +216,53 @@ namespace AdminWebPage.Controllers
         {
             return _context.Account.Any(e => e.AccountID == id);
         }
+
+        private async Task<string> GenerateStudentUsername()
+        {
+            string prefix = "26-";
+
+            // Get last student username
+            var lastUsername = await _context.Account
+                .Where(a => a.Role == "Student" && a.Username.StartsWith(prefix))
+                .OrderByDescending(a => a.Username)
+                .Select(a => a.Username)
+                .FirstOrDefaultAsync();
+
+            int nextNumber = 2000001;
+
+            if (!string.IsNullOrEmpty(lastUsername))
+            {
+                // Extract numeric part
+                var numberPart = lastUsername.Replace(prefix, "");
+                if (int.TryParse(numberPart, out int lastNumber))
+                {
+                    nextNumber = lastNumber + 1;
+                }
+            }
+
+            string newUsername;
+
+            do
+            {
+                newUsername = $"{prefix}{nextNumber}";
+                nextNumber++;
+            }
+            while (await _context.Account.AnyAsync(a => a.Username == newUsername));
+
+            return newUsername;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GenerateStudentAccount()
+        {
+            var username = await GenerateStudentUsername();
+
+            return Json(new
+            {
+                username = username,
+                password = username
+            });
+        }
+
     }
 }

@@ -27,9 +27,11 @@ namespace AdminWebPage.Controllers
             if (ModelState.IsValid)
             {
                 var account = await _context.Account
-                    .FirstOrDefaultAsync(a =>
-                        a.Username == model.Username &&
-                        a.Password == model.Password);
+     .AsNoTracking()
+     .FirstOrDefaultAsync(a =>
+         a.Username == model.Username &&
+         a.Password == model.Password);
+
 
                 if (account != null)
                 {
@@ -60,83 +62,7 @@ namespace AdminWebPage.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
-        {
-            if (string.IsNullOrEmpty(model.VerificationCode))
-            {
-                // Step 1: Generate code and send email
-                var account = await _context.Account
-                    .FirstOrDefaultAsync(a => a.Email == model.Email);
-
-                if (account == null)
-                {
-                    ViewBag.Error = "Email not found.";
-                    return View();
-                }
-
-                // Generate 6-digit code
-                var code = new Random().Next(100000, 999999).ToString();
-
-                // Store in TempData for simplicity (in production use DB or cache)
-                TempData["VerificationCode"] = code;
-                TempData["UserEmail"] = model.Email;
-
-                // Send email
-                try
-                {
-                    var smtpClient = new SmtpClient("smtp.your-email-provider.com")
-                    {
-                        Port = 587,
-                        Credentials = new NetworkCredential("your-email@example.com", "your-email-password"),
-                        EnableSsl = true,
-                    };
-
-                    var mailMessage = new MailMessage
-                    {
-                        From = new MailAddress("your-email@example.com"),
-                        Subject = "Password Reset Verification Code",
-                        Body = $"Your verification code is: {code}",
-                        IsBodyHtml = false,
-                    };
-
-                    mailMessage.To.Add(model.Email);
-
-                    await smtpClient.SendMailAsync(mailMessage);
-                }
-                catch (Exception ex)
-                {
-                    ViewBag.Error = "Failed to send email. " + ex.Message;
-                    return View();
-                }
-
-                ViewBag.Success = "Verification code sent to your email.";
-                return View();
-            }
-            else
-            {
-                // Step 2: Verify code
-                if (model.VerificationCode == TempData["VerificationCode"]?.ToString() &&
-                    model.Email == TempData["UserEmail"]?.ToString())
-                {
-                    // Allow password reset
-                    return RedirectToAction("ResetPassword", new { email = model.Email });
-                }
-                else
-                {
-                    ViewBag.Error = "Invalid verification code.";
-                    return View();
-                }
-            }
-        }
-
-        public IActionResult ResetPassword(string email)
-        {
-            ViewBag.Email = email;
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ResetPassword(string email, string newPassword)
+        public async Task<IActionResult> ForgotPassword(string email)
         {
             var account = await _context.Account.FirstOrDefaultAsync(a => a.Email == email);
 
@@ -146,14 +72,106 @@ namespace AdminWebPage.Controllers
                 return View();
             }
 
-            account.Password = newPassword;
-            _context.Update(account);
-            await _context.SaveChangesAsync();
+            string code = new Random().Next(100000, 999999).ToString();
 
-            ViewBag.Success = "Password updated successfully.";
-            return RedirectToAction("Login");
+            HttpContext.Session.SetString("ResetCode", code);
+            HttpContext.Session.SetString("ResetEmail", email);
+
+            try
+            {
+                var smtp = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential(
+                        "babala123h@gmail.com",
+                        "adax jrum inbk vhvp"
+                    ),
+                    EnableSsl = true
+                };
+
+                var mail = new MailMessage
+                {
+                    From = new MailAddress("babala123h@gmail.com"),
+                    Subject = "Password Reset Code",
+                    Body = $"Your verification code is: {code}"
+                };
+
+                mail.To.Add(email);
+                await smtp.SendMailAsync(mail);
+            }
+            catch
+            {
+                ViewBag.Error = "Failed to send email.";
+                return View();
+            }
+
+            return RedirectToAction("VerifyCode");
         }
 
+        public IActionResult VerifyCode()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult VerifyCode(string code)
+        {
+            string savedCode = HttpContext.Session.GetString("ResetCode");
+
+            if (code != savedCode)
+            {
+                ViewBag.Error = "Invalid verification code.";
+                return View();
+            }
+
+            return RedirectToAction("ResetPassword");
+        }
+
+
+
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(string newPassword, string confirmPassword)
+        {
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Passwords do not match.";
+                return View();
+            }
+
+            string email = HttpContext.Session.GetString("ResetEmail");
+
+            if (string.IsNullOrEmpty(email))
+            {
+                ViewBag.Error = "Session expired. Please try again.";
+                return View();
+            }
+
+            var account = await _context.Account.FirstOrDefaultAsync(a => a.Email == email);
+
+            if (account == null)
+            {
+                ViewBag.Error = "Account not found.";
+                return View();
+            }
+
+            // ✅ UPDATE PASSWORD
+            account.Password = newPassword;
+
+            // ✅ FORCE EF TO TRACK THE CHANGE
+            _context.Account.Update(account);
+            await _context.SaveChangesAsync();
+
+            // ✅ CLEAR SESSION
+            HttpContext.Session.Clear();
+
+            TempData["Success"] = "Password reset successfully.";
+            return RedirectToAction("Login");
+        }
 
         public IActionResult Logout()
         {

@@ -33,6 +33,16 @@
                 <input asp-for="Username" class="form-control" />
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" onclick="generateAccount()">
+                    Generate Student Account
+                </button>
+            </div>
 
 
             <div class="form-group">
@@ -40,11 +50,7 @@
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
+        
             <div class="form-group">
                 <label asp-for="Role"></label>
                 <select asp-for="Role" class="form-control">
@@ -67,4 +73,21 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function generateAccount() {
+            fetch('/Accounts/GenerateStudentAccount')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('Username').value = data.username;
+                    document.getElementById('Password').value = data.password;
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Failed to generate account.");
+                });
+        }
+    </script>
 }
+
+
