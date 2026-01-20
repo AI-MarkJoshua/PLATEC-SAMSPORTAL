@@ -20,7 +20,8 @@ namespace AdminWebPage.Controllers
         }
 
         // GET: Accounts
-        public async Task<IActionResult> Index(string search, string role)
+        // GET: Accounts
+        public async Task<IActionResult> Index(string search, string role, int page = 1)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             if (userRole != "Teacher")
@@ -29,9 +30,11 @@ namespace AdminWebPage.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
+            int pageSize = 10;
+
             var accounts = _context.Account.AsQueryable();
 
-            // 🔍 Search by name (FName, MName, LName)
+            // 🔍 Search
             if (!string.IsNullOrEmpty(search))
             {
                 accounts = accounts.Where(a =>
@@ -40,17 +43,29 @@ namespace AdminWebPage.Controllers
                     a.LName.Contains(search));
             }
 
-            // 🎯 Filter by role
+            // 🎯 Filter
             if (!string.IsNullOrEmpty(role))
             {
                 accounts = accounts.Where(a => a.Role == role);
             }
 
+            int totalRecords = await accounts.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            var pagedAccounts = await accounts
+                .OrderBy(a => a.AccountID)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
             ViewBag.Search = search;
             ViewBag.Role = role;
 
-            return View(await accounts.ToListAsync());
+            return View(pagedAccounts);
         }
+
 
         // GET: Accounts/Search
         public async Task<IActionResult> Search(string search, string role)

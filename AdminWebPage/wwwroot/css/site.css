@@ -57,4 +57,67 @@ body {
     border-radius: 15px;
 }
 
-    
+/* Base pagination link */
+.custom-page-link {
+    color: #20274a;
+    background-color: transparent;
+    border: none;
+    margin: 0 6px;
+    padding: 6px 12px;
+    font-weight: 500;
+}
+
+/* Active page = CIRCLE */
+.page-item.active .custom-page-link {
+    background-color: #20274a;
+    color: #fff;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Disable < > */
+.page-item.disabled .custom-page-link {
+    color: #b5b5b5;
+    pointer-events: none;
+}
+
+/* Remove hover background */
+.custom-page-link:hover {
+    background-color: rgba(32, 39, 74, 0.08);
+    border-radius: 50%;
+}
+
+/* FORCE REMOVE Bootstrap page-link background */
+.pagination .page-link {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+    /* Remove background on hover & focus */
+    .pagination .page-link:hover,
+    .pagination .page-link:focus {
+        background-color: transparent !important;
+    }
+
+/* Active page = circle */
+.pagination .page-item.active .page-link {
+    background-color: #20274a !important;
+    color: #fff !important;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Disabled arrows */
+.pagination .page-item.disabled .page-link {
+    color: #b5b5b5 !important;
+    pointer-events: none;
+}
