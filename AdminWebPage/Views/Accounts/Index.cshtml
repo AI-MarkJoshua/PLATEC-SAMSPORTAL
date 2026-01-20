@@ -158,12 +158,6 @@
     </nav>
 
 </div>
-
-
-
-
-
-
 @section Scripts {
     <script>
         const searchBox = document.getElementById('searchBox');
@@ -191,8 +185,12 @@
             tableBody.innerHTML = '';
 
             if (!data || data.length === 0) {
-                tableBody.innerHTML =
-                    `<tr><td colspan="6" class="text-center text-muted">No accounts found.</td></tr>`;
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No accounts found.
+                        </td>
+                    </tr>`;
                 return;
             }
 
@@ -205,28 +203,46 @@
                         <td>${account.username}</td>
                         <td>${account.email}</td>
                         <td>
-                            <span class="badge ${account.role === 'Teacher' ? 'bg-primary' : 'bg-secondary'}">
-                                ${account.role}
-                            </span>
+                            ${
+                                account.role === 'Teacher'
+                                    ? `<span class="badge rounded-20"
+                                            style="background-color:#d4edda;color:#28a745;font-weight:600;">
+                                            ● Teacher
+                                       </span>`
+                                    : `<span class="badge rounded-20"
+                                            style="background-color:#cce5ff;color:#007bff;font-weight:600;">
+                                            ● Student
+                                       </span>`
+                            }
                         </td>
                         <td>
-                            <a href="/Accounts/Edit/${account.accountID}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="/Accounts/Delete/${account.accountID}" class="btn btn-sm btn-danger">Delete</a>
+                            <a href="/Accounts/Edit/${account.accountID}"
+                               class="text-dark fs-5 fw-bold mx-1 text-decoration-none"
+                               data-bs-toggle="tooltip"
+                               title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <a href="/Accounts/Delete/${account.accountID}"
+                               class="text-dark fs-5 fw-bold mx-1 text-decoration-none"
+                               data-bs-toggle="tooltip"
+                               title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
                         </td>
                     </tr>`;
             });
+
+            // ✅ RE-INITIALIZE TOOLTIPS AFTER AJAX
+            const tooltipTriggerList = [].slice.call(
+                document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            );
+            tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
         }
 
         const debouncedFetch = debounce(fetchAccounts, 300);
         searchBox.addEventListener('input', debouncedFetch);
         roleFilter.addEventListener('change', fetchAccounts);
     </script>
-    <script>
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-    </script>
-
 }
 
