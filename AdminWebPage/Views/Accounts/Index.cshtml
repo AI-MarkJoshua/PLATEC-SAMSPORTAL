@@ -7,41 +7,63 @@
 <h2 class="mb-4">Account List</h2>
 
 <form method="get" class="row g-3 mb-3" id="searchForm">
-    <div class="col-md-5">
-        <input type="text"
-               id="searchBox"
-               value="@ViewBag.Search"
-               class="form-control"
-               placeholder="Search name..." />
+
+    <!-- Search & Filter (White Background) -->
+    <div class="col-md-9">
+        <div class="bg-white p-3 rounded-20 shadow-sm h-100">
+            <div class="row g-3">
+                <!-- Wider Search Box -->
+                <div class="col-md-9">
+                    <input type="text"
+                           id="searchBox"
+                           value="@ViewBag.Search"
+                           class="form-control rounded-20"
+                           placeholder="Search name..." />
+                </div>
+
+                <!-- Narrower Filter -->
+                <div class="col-md-3">
+                    <select id="roleFilter" class="form-select rounded-20">
+                        <option value="">All Roles</option>
+                        <option value="Teacher" selected="@(ViewBag.Role == "Teacher" ? "selected" : null)">Teacher</option>
+                        <option value="Student" selected="@(ViewBag.Role == "Student" ? "selected" : null)">Student</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- Create New Button -->
     <div class="col-md-3">
-        <select id="roleFilter" class="form-select">
-            <option value="">All Roles</option>
-            <option value="Teacher" selected="@(ViewBag.Role == "Teacher" ? "selected" : null)">Teacher</option>
-            <option value="Student" selected="@(ViewBag.Role == "Student" ? "selected" : null)">Student</option>
-        </select>
-
+        <div class="bg-white p-3 rounded-20 shadow-sm h-100 d-flex align-items-center">
+            <a asp-action="Create"
+               class="btn w-100 text-white rounded-20"
+               style="background-color:#20274a; border-color:#20274a;">
+                Create New
+            </a>
+        </div>
     </div>
 
-    <div class="col-md-2">
-        <a asp-action="Create" class="btn btn-success w-100">Create New</a>
-    </div>
+
 </form>
 
+
+
 <!-- Table Container -->
-<div class="table-responsive shadow-sm rounded">
-    <table class="table table-striped table-bordered mb-0 bg-white">
-        <thead class="table-dark">
+<div class="table-responsive shadow-sm border rounded-20 overflow-hidden">
+    <table class="table table-striped mb-0 bg-white">
+        <thead class="table-light" style="color: #666565;">
             <tr>
                 <th>First Name</th>
                 <th>Middle Name</th>
                 <th>Last Name</th>
+                <th>Username</th>
                 <th>Email</th>
                 <th>Role</th>
                 <th style="width:180px">Actions</th>
             </tr>
         </thead>
+
         <tbody id="accountTableBody">
             @foreach (var item in Model)
             {
@@ -49,21 +71,53 @@
                     <td>@item.FName</td>
                     <td>@item.MName</td>
                     <td>@item.LName</td>
+                    <td>@item.Username</td>
                     <td>@item.Email</td>
                     <td>
-                        <span class="badge @(item.Role == "Teacher" ? "bg-primary" : "bg-secondary")">
-                            @item.Role
-                        </span>
+                        @if (item.Role == "Teacher")
+                        {
+                            <span class="badge rounded-20"
+                                  style="background-color: #d4edda; color: #28a745; font-weight: 600;">
+                                ● Teacher
+                            </span>
+                        }
+                        else if (item.Role == "Student")
+                        {
+                            <span class="badge rounded-20"
+                                  style="background-color: #cce5ff; color: #007bff; font-weight: 600;">
+                                ● Student
+                            </span>
+                        }
                     </td>
+
+
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.AccountID" class="btn btn-sm btn-warning">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@item.AccountID" class="btn btn-sm btn-danger">Delete</a>
+                        <!-- Edit Icon -->
+                        <a asp-action="Edit" asp-route-id="@item.AccountID"
+                           class="text-dark fs-5 fw-bold mx-1 text-decoration-none"
+                           data-bs-toggle="tooltip"
+                           title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <!-- Delete Icon -->
+                        <a asp-action="Delete" asp-route-id="@item.AccountID"
+                           class="text-dark fs-5 fw-bold mx-1 text-decoration-none"
+                           data-bs-toggle="tooltip"
+                           title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
                     </td>
+
+
+
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+
 
 @section Scripts {
     <script>
@@ -103,6 +157,7 @@
                         <td>${account.fName}</td>
                         <td>${account.mName ?? ''}</td>
                         <td>${account.lName}</td>
+                        <td>${account.username}</td>
                         <td>${account.email}</td>
                         <td>
                             <span class="badge ${account.role === 'Teacher' ? 'bg-primary' : 'bg-secondary'}">
@@ -121,4 +176,12 @@
         searchBox.addEventListener('input', debouncedFetch);
         roleFilter.addEventListener('change', fetchAccounts);
     </script>
+    <script>
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+
 }
+

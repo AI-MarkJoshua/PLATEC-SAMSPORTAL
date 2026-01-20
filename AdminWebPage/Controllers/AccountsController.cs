@@ -77,6 +77,7 @@ namespace AdminWebPage.Controllers
                 a.FName,
                 a.MName,
                 a.LName,
+                a.Username,
                 a.Email,
                 a.Role
             }).ToListAsync();
