@@ -6,46 +6,53 @@
 
 <h2 class="mb-4">Account List</h2>
 
-<form method="get" class="row g-3 mb-3" id="searchForm">
+<form method="get" class="row g-3 mb-3">
 
-    <!-- Search & Filter (White Background) -->
+    <!-- Reset page to 1 when searching -->
+    <input type="hidden" name="page" value="1" />
+
     <div class="col-md-9">
         <div class="bg-white p-3 rounded-20 shadow-sm h-100">
             <div class="row g-3">
-                <!-- Wider Search Box -->
+
+                <!-- Search -->
                 <div class="col-md-9">
                     <input type="text"
-                           id="searchBox"
+                           name="search"
                            value="@ViewBag.Search"
                            class="form-control rounded-20"
-                           placeholder="Search name..." />
+                           placeholder="Search name..."
+                           onchange="this.form.submit()" />
                 </div>
 
-                <!-- Narrower Filter -->
+                <!-- Filter -->
                 <div class="col-md-3">
-                    <select id="roleFilter" class="form-select rounded-20">
+                    <select name="role"
+                            class="form-select rounded-20"
+                            onchange="this.form.submit()">
                         <option value="">All Roles</option>
-                        <option value="Teacher" selected="@(ViewBag.Role == "Teacher" ? "selected" : null)">Teacher</option>
-                        <option value="Student" selected="@(ViewBag.Role == "Student" ? "selected" : null)">Student</option>
+                        <option value="Teacher" selected="@(ViewBag.Role == "Teacher")">Teacher</option>
+                        <option value="Student" selected="@(ViewBag.Role == "Student")">Student</option>
                     </select>
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Create New Button -->
+    <!-- Create Button -->
     <div class="col-md-3">
         <div class="bg-white p-3 rounded-20 shadow-sm h-100 d-flex align-items-center">
             <a asp-action="Create"
                class="btn w-100 text-white rounded-20"
-               style="background-color:#20274a; border-color:#20274a;">
+               style="background-color:#20274a;">
                 Create New
             </a>
         </div>
     </div>
 
-
 </form>
+
 
 
 

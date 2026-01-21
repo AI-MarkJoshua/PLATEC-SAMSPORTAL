@@ -1,93 +1,130 @@
 ﻿@model AdminWebPage.Models.Account
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Account";
 }
 
-<h1>Create</h1>
+<h2 class="mb-4">Create Account</h2>
 
-<h4>Account</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FName" class="control-label"></label>
-                <input asp-for="FName" class="form-control" />
-                <span asp-validation-for="FName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MName" class="control-label"></label>
-                <input asp-for="MName" class="form-control" />
-                <span asp-validation-for="MName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LName" class="control-label"></label>
-                <input asp-for="LName" class="form-control" />
-                <span asp-validation-for="LName" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <form asp-action="Create" class="bg-white p-4 rounded-20 shadow-sm">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <!-- ================= PERSONAL INFORMATION ================= -->
+            <h5 class="mb-3 text-secondary">Personal Information</h5>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label asp-for="FName" class="form-label">First Name</label>
+                    <input asp-for="FName" class="form-control rounded-20" />
+                    <span asp-validation-for="FName" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="MName" class="form-label">Middle Name</label>
+                    <input asp-for="MName" class="form-control rounded-20" />
+                    <span asp-validation-for="MName" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="LName" class="form-label">Last Name</label>
+                    <input asp-for="LName" class="form-control rounded-20" />
+                    <span asp-validation-for="LName" class="text-danger"></span>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
+            <!-- ================= ACCOUNT CREDENTIALS ================= -->
+            <h5 class="mb-3 text-secondary">Account Credentials</h5>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label asp-for="Username" class="form-label">Username</label>
+                    <input asp-for="Username"
+                           id="Username"
+                           class="form-control rounded-20"
+                           readonly />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password"
+                           id="Password"
+                           class="form-control rounded-20"
+                           readonly />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <button type="button" class="btn btn-secondary" onclick="generateAccount()">
+
+            <!-- Generate Button -->
+            <div class="mb-4">
+                <button type="button"
+                        class="btn btn-outline-primary rounded-20"
+                        onclick="generateAccount()">
                     Generate Student Account
+                </button>
+                <small class="text-muted ms-2">
+                    Automatically generates username & password
+                </small>
+            </div>
+
+            <!-- ================= OTHER DETAILS ================= -->
+            <h5 class="mb-3 text-secondary">Other Details</h5>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control rounded-20" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Role" class="form-label">Role</label>
+                    <select asp-for="Role" class="form-select rounded-20">
+                        <option value="">-- Select Role --</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Student">Student</option>
+                    </select>
+                    <span asp-validation-for="Role" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- ================= ACTION BUTTONS ================= -->
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index"
+                   class="btn btn-light rounded-20">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="btn text-white rounded-20"
+                        style="background-color:#20274a;">
+                    Create Account
                 </button>
             </div>
 
-
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-        
-            <div class="form-group">
-                <label asp-for="Role"></label>
-                <select asp-for="Role" class="form-control">
-                    <option value="">--Select Role--</option>
-                    <option value="Teacher">Teacher</option>
-                    <option value="Student">Student</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
         </form>
+
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script>
         function generateAccount() {
             fetch('/Accounts/GenerateStudentAccount')
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(data => {
                     document.getElementById('Username').value = data.username;
                     document.getElementById('Password').value = data.password;
                 })
-                .catch(error => {
-                    console.error(error);
-                    alert("Failed to generate account.");
-                });
+                .catch(() => alert("Failed to generate account."));
         }
     </script>
 }
-
-

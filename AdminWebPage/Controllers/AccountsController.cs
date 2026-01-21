@@ -39,7 +39,7 @@ namespace AdminWebPage.Controllers
             {
                 accounts = accounts.Where(a =>
                     a.FName.Contains(search) ||
-                    a.MName.Contains(search) ||
+                    (a.MName != null && a.MName.Contains(search)) ||
                     a.LName.Contains(search));
             }
 
@@ -51,6 +51,10 @@ namespace AdminWebPage.Controllers
 
             int totalRecords = await accounts.CountAsync();
             int totalPages = (int)Math.Ceiling(totalRecords / (double)pageSize);
+
+            // ✅ Safety: prevent invalid page
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
 
             var pagedAccounts = await accounts
                 .OrderBy(a => a.AccountID)
@@ -67,38 +71,39 @@ namespace AdminWebPage.Controllers
         }
 
 
+
         // GET: Accounts/Search
-        public async Task<IActionResult> Search(string search, string role)
-        {
-            var accounts = _context.Account.AsQueryable();
+        //   public async Task<IActionResult> Search(string search, string role)
+        //   {
+        //       var accounts = _context.Account.AsQueryable();
 
-            if (!string.IsNullOrEmpty(search))
-            {
-                accounts = accounts.Where(a =>
-     a.FName.Contains(search) ||
-     (a.MName != null && a.MName.Contains(search)) ||
-     a.LName.Contains(search));
+        //       if (!string.IsNullOrEmpty(search))
+        //       {
+        //           accounts = accounts.Where(a =>
+        //a.FName.Contains(search) ||
+        //(a.MName != null && a.MName.Contains(search)) ||
+        //a.LName.Contains(search));
 
-            }
+        //       }
 
-            if (!string.IsNullOrEmpty(role))
-            {
-                accounts = accounts.Where(a => a.Role == role);
-            }
+        //       if (!string.IsNullOrEmpty(role))
+        //       {
+        //           accounts = accounts.Where(a => a.Role == role);
+        //       }
 
-            var result = await accounts.Select(a => new
-            {
-                a.AccountID,
-                a.FName,
-                a.MName,
-                a.LName,
-                a.Username,
-                a.Email,
-                a.Role
-            }).ToListAsync();
+        //       var result = await accounts.Select(a => new
+        //       {
+        //           a.AccountID,
+        //           a.FName,
+        //           a.MName,
+        //           a.LName,
+        //           a.Username,
+        //           a.Email,
+        //           a.Role
+        //       }).ToListAsync();
 
-            return Json(result);
-        }
+        //       return Json(result);
+        //   }
 
 
 
