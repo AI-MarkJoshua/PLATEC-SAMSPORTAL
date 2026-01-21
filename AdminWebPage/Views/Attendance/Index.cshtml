@@ -20,10 +20,6 @@
 
 @if (ViewBag.SelectedDate != null && Model.Any())
 {
-    <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#attendanceModal">
-        Open Student Attendance
-    </button>
-
     <!-- Modal -->
     <div class="modal fade" id="attendanceModal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-lg">
@@ -34,7 +30,6 @@
                 </div>
 
                 <div class="modal-body">
-                    <!-- Add hidden form for antiforgery token -->
                     <form id="attendanceForm">
                         @Html.AntiForgeryToken()
 
@@ -123,11 +118,11 @@
     });
 
     // Save Attendance button
+       // Save Attendance button
     document.getElementById('saveAttendanceBtn')?.addEventListener('click', function () {
         const date = document.querySelector('input[name="selectedDate"]').value;
         const token = document.querySelector('#attendanceForm input[name="__RequestVerificationToken"]').value;
 
-        // Convert to array of payloads
         const payloads = Object.entries(attendanceState).map(([studentId, status]) => ({
             studentId: parseInt(studentId),
             status: status,
@@ -136,7 +131,7 @@
 
         if (payloads.length === 0) {
             alert("No attendance selected!");
-            return;
+            return; // Do not close modal
         }
 
         fetch('/Attendance/MarkAll', {
@@ -150,14 +145,37 @@
         .then(res => {
             if (res.ok) {
                 alert('Attendance saved successfully!');
-                // Optional: update attendanceMap to keep buttons active
-                payloads.forEach(p => {
-                    attendanceState[p.studentId] = p.status;
-                });
+                // Update local state
+                payloads.forEach(p => attendanceState[p.studentId] = p.status);
+
+                // Close modal automatically
+                const modalEl = document.getElementById('attendanceModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
             } else {
                 alert('Failed to save attendance.');
+                // Keep modal open
             }
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            alert('Failed to save attendance.');
+            // Keep modal open
+        });
+    });
+
+
+    // Automatically open modal if students are loaded
+    window.addEventListener('DOMContentLoaded', () => {
+    @* Only trigger if we have students *@
+    @if (ViewBag.SelectedDate != null && Model.Any())
+    {
+        <text>
+                    var attendanceModal = new bootstrap.Modal(document.getElementById('attendanceModal'));
+                    attendanceModal.show();
+        </text>
+    }
     });
 </script>
