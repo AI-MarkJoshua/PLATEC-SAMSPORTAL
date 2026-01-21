@@ -1,43 +1,163 @@
 ﻿@model List<AdminWebPage.Models.Account>
 
-<h2>Mark Attendance</h2>
+@{
+    var attendanceMap = ViewBag.AttendanceMap as Dictionary<int, string> ?? new();
+}
 
-<form method="get">
-    <label>Select Attendance Date:</label>
-    <input type="date" name="selectedDate" value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")" required />
-    <button type="submit" class="btn btn-primary">Load Students</button>
+<h2 class="mb-3">Mark Attendance</h2>
+
+<form method="get" class="mb-4">
+    <label class="form-label">Select Attendance Date</label>
+    <div class="d-flex gap-2">
+        <input type="date"
+               name="selectedDate"
+               value="@ViewBag.SelectedDate?.ToString("yyyy-MM-dd")"
+               class="form-control w-auto"
+               required />
+        <button type="submit" class="btn btn-primary">Load Students</button>
+    </div>
 </form>
 
 @if (ViewBag.SelectedDate != null && Model.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Student</th>
-                <th>Mark</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var student in Model)
-            {
-                <tr>
-                    <td>@student.FName @student.LName</td>
-                    <td>
-                        <form asp-action="Mark" method="post" style="display:inline">
-                            <input type="hidden" name="studentId" value="@student.AccountID" />
-                            <input type="hidden" name="date" value="@ViewBag.SelectedDate.ToString("yyyy-MM-dd")" />
+    <button type="button" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#attendanceModal">
+        Open Student Attendance
+    </button>
 
-                            <button type="submit" name="status" value="Present" class="btn btn-success">Present</button>
-                            <button type="submit" name="status" value="Absent" class="btn btn-danger">Absent</button>
-                            <button type="submit" name="status" value="Late" class="btn btn-warning">Late</button>
-                        </form>
-                    </td>
-                </tr>
+    <!-- Modal -->
+    <div class="modal fade" id="attendanceModal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="attendanceModalLabel">Mark Attendance - @ViewBag.SelectedDate?.ToString("yyyy-MM-dd")</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Add hidden form for antiforgery token -->
+                    <form id="attendanceForm">
+                        @Html.AntiForgeryToken()
+
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th class="text-center">Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var student in Model)
+                                {
+                                    var status = attendanceMap.ContainsKey(student.AccountID)
+                                    ? attendanceMap[student.AccountID]
+                                    : "";
+
+                                    <tr>
+                                        <td>@student.FName @student.LName</td>
+                                        <td class="text-center">
+                                            <div class="d-inline-flex gap-2">
+                                                <button type="button"
+                                                        class="btn attendance-btn @(status == "Present" ? "btn-success active" : "btn-outline-success")"
+                                                        data-student="@student.AccountID"
+                                                        data-status="Present">
+                                                    Present
+                                                </button>
+
+                                                <button type="button"
+                                                        class="btn attendance-btn @(status == "Absent" ? "btn-danger active" : "btn-outline-danger")"
+                                                        data-student="@student.AccountID"
+                                                        data-status="Absent">
+                                                    Absent
+                                                </button>
+
+                                                <button type="button"
+                                                        class="btn attendance-btn @(status == "Late" ? "btn-warning active" : "btn-outline-warning")"
+                                                        data-student="@student.AccountID"
+                                                        data-status="Late">
+                                                    Late
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="saveAttendanceBtn">Save Attendance</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    const attendanceState = {}; // Track selected status
+
+    // Initialize button click
+    document.querySelectorAll('.attendance-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const studentId = this.dataset.student;
+            const status = this.dataset.status;
+            const parent = this.parentElement;
+
+            // Remove active classes from siblings
+            parent.querySelectorAll('.attendance-btn').forEach(b => {
+                b.classList.remove('active', 'btn-success', 'btn-danger', 'btn-warning');
+                if (b.dataset.status === 'Present') b.classList.add('btn-outline-success');
+                if (b.dataset.status === 'Absent') b.classList.add('btn-outline-danger');
+                if (b.dataset.status === 'Late') b.classList.add('btn-outline-warning');
+            });
+
+            // Apply active style to clicked button
+            if (status === 'Present') this.classList.add('btn-success', 'active');
+            if (status === 'Absent') this.classList.add('btn-danger', 'active');
+            if (status === 'Late') this.classList.add('btn-warning', 'active');
+
+            // Save locally in JS
+            attendanceState[studentId] = status;
+        });
+    });
+
+    // Save Attendance button
+    document.getElementById('saveAttendanceBtn')?.addEventListener('click', function () {
+        const date = document.querySelector('input[name="selectedDate"]').value;
+        const token = document.querySelector('#attendanceForm input[name="__RequestVerificationToken"]').value;
+
+        // Convert to array of payloads
+        const payloads = Object.entries(attendanceState).map(([studentId, status]) => ({
+            studentId: parseInt(studentId),
+            status: status,
+            date: date
+        }));
+
+        if (payloads.length === 0) {
+            alert("No attendance selected!");
+            return;
+        }
+
+        fetch('/Attendance/MarkAll', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+            },
+            body: JSON.stringify(payloads)
+        })
+        .then(res => {
+            if (res.ok) {
+                alert('Attendance saved successfully!');
+                // Optional: update attendanceMap to keep buttons active
+                payloads.forEach(p => {
+                    attendanceState[p.studentId] = p.status;
+                });
+            } else {
+                alert('Failed to save attendance.');
             }
-        </tbody>
-    </table>
-}
-else
-{
-    <p class="text-muted">Please select a date to show students.</p>
-}
+        })
+        .catch(err => console.error(err));
+    });
+</script>
