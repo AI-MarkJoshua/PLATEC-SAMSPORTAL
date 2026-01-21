@@ -18,8 +18,8 @@
 
 @if (Model.Any())
 {
-    <!-- Print Button -->
-    <div class="mb-3">
+    <!-- Print Button aligned to the right -->
+    <div class="mb-3 d-flex justify-content-end">
         <button class="btn btn-success" onclick="printReport()">Print Report</button>
     </div>
 
@@ -97,8 +97,4 @@
             location.reload(); // reload page to restore JS functionality
         }
     </script>
-}
-else
-{
-    <p class="text-muted">Please select a date range to view the report.</p>
 }
