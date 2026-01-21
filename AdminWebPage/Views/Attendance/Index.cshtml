@@ -17,6 +17,83 @@
         <button type="submit" class="btn btn-primary">Load Students</button>
     </div>
 </form>
+@if (ViewBag.AttendanceDates != null && ViewBag.AttendanceDates.Count > 0)
+{
+    <h5 class="mt-4 mb-3">Attendance History</h5>
+    <div class="d-flex flex-wrap gap-3">
+        @foreach (DateTime date in ViewBag.AttendanceDates)
+        {
+            <div class="attendance-card card text-center shadow-sm" style="width: 150px; cursor:pointer;"
+                 data-bs-toggle="modal" data-bs-target="#attendanceModal-@date.ToString("yyyyMMdd")">
+                <div class="card-body">
+                    <h6 class="card-title mb-1">@date.ToString("yyyy-MM-dd")</h6>
+                    <p class="card-text text-muted">View Attendance</p>
+                </div>
+            </div>
+
+            <!-- Modal for this date -->
+            <div class="modal fade" id="attendanceModal-@date.ToString("yyyyMMdd")" tabindex="-1"
+                 aria-labelledby="attendanceModalLabel-@date.ToString("yyyyMMdd")" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="attendanceModalLabel-@date.ToString("yyyyMMdd")">
+                                Attendance - @date.ToString("yyyy-MM-dd")
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var student in Model)
+                                    {
+                                        var attendanceByDate = ViewBag.AttendanceByDate as Dictionary<DateTime, Dictionary<int, string>>;
+                                        var status = "";
+                                        if (attendanceByDate != null && attendanceByDate.ContainsKey(date))
+                                        {
+                                            attendanceByDate[date].TryGetValue(student.AccountID, out status);
+                                        }
+
+                                        <tr>
+                                            <td>@student.FName @student.LName</td>
+                                            <td class="text-center">
+                                                @if (status == "Present")
+                                                {
+                                                    <span class="badge bg-success">Present</span>
+                                                }
+                                                else if (status == "Absent")
+                                                {
+                                                    <span class="badge bg-danger">Absent</span>
+                                                }
+                                                else if (status == "Late")
+                                                {
+                                                    <span class="badge bg-warning text-dark">Late</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">N/A</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
 
 @if (ViewBag.SelectedDate != null && Model.Any())
 {
@@ -88,6 +165,7 @@
         </div>
     </div>
 }
+
 
 <script>
     const attendanceState = {}; // Track selected status

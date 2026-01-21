@@ -1,21 +1,16 @@
 ﻿@model List<AdminWebPage.Models.AttendanceReportViewModel>
-@{
-    ViewBag.Title = ViewBag.ReportType + " Attendance Report";
-}
 
 <h2>Attendance Report</h2>
 
-<form method="get" class="row g-3">
+<form method="get" class="row g-3 mb-3">
     <div class="col-md-4">
         <label>Start Date</label>
         <input type="date" name="startDate" class="form-control" required />
     </div>
-
     <div class="col-md-4">
         <label>End Date</label>
         <input type="date" name="endDate" class="form-control" required />
     </div>
-
     <div class="col-md-4 align-self-end">
         <button type="submit" class="btn btn-primary">Generate Report</button>
     </div>
@@ -23,29 +18,65 @@
 
 @if (Model.Any())
 {
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Total Students</th>
-                <th>Present</th>
-                <th>Absent</th>
-                <th>Late</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Date.ToString("yyyy-MM-dd")</td>
-                    <td>@item.TotalStudents</td>
-                    <td>@item.PresentCount</td>
-                    <td>@item.AbsentCount</td>
-                    <td>@item.LateCount</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <!-- Header Image -->
+    <div class="text-center mb-3">
+        <img src="~/image/mkaHeader.png" alt="MKA Header" class="img-fluid" />
+    </div>
+
+    <!-- Summary Section -->
+    <div class="card mb-3">
+        <div class="card-header bg-light"><strong>Summary</strong></div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Total Students</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Late</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>@Model.Sum(m => m.TotalStudents)</td>
+                        <td>@Model.Sum(m => m.PresentCount)</td>
+                        <td>@Model.Sum(m => m.AbsentCount)</td>
+                        <td>@Model.Sum(m => m.LateCount)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Detailed List Section -->
+    <div class="card mb-3">
+        <div class="card-header bg-light"><strong>Detailed Attendance</strong></div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>First Name</th>
+                        <th>Middle Name</th>
+                        <th>Last Name</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in (List<dynamic>)ViewBag.DetailedList)
+                    {
+                        <tr>
+                            <td>@item.Date</td>
+                            <td>@item.FName</td>
+                            <td>@item.MName</td>
+                            <td>@item.LName</td>
+                            <td>@item.Remarks</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 }
 else
 {

@@ -16,28 +16,50 @@ namespace AdminWebPage.Controllers
             _context = context;
         }
         // GET: Attendance
-        // GET: Attendance
         public async Task<IActionResult> Index(DateTime? selectedDate)
         {
             ViewBag.SelectedDate = selectedDate;
-
-            if (selectedDate == null)
-                return View(new List<Account>());
 
             var students = await _context.Account
                 .Where(a => a.Role == "Student")
                 .ToListAsync();
 
-            // Load attendance for the selected date (compare only date part)
-            var attendanceDict = await _context.Attendances
-                .Where(a => a.Date >= selectedDate.Value.Date
-                         && a.Date < selectedDate.Value.Date.AddDays(1))
-                .ToDictionaryAsync(a => a.StudentId, a => a.Status);
-
+            // Load attendance for selected date
+            var attendanceDict = new Dictionary<int, string>();
+            if (selectedDate != null)
+            {
+                attendanceDict = await _context.Attendances
+                    .Where(a => a.Date >= selectedDate.Value.Date
+                             && a.Date < selectedDate.Value.Date.AddDays(1))
+                    .ToDictionaryAsync(a => a.StudentId, a => a.Status);
+            }
             ViewBag.AttendanceMap = attendanceDict;
+
+            // Get all attendance dates
+            var attendanceDates = await _context.Attendances
+                .Select(a => a.Date.Date)
+                .Distinct()
+                .OrderByDescending(d => d)
+                .ToListAsync();
+
+            ViewBag.AttendanceDates = attendanceDates;
+
+            // Load all attendances grouped by date for modal display
+            var allAttendance = await _context.Attendances
+                .Include(a => a.Student)
+                .ToListAsync();
+
+            // Group by date
+            var attendanceByDate = allAttendance
+                .GroupBy(a => a.Date.Date)
+                .ToDictionary(g => g.Key, g => g.ToDictionary(a => a.StudentId, a => a.Status));
+
+            ViewBag.AttendanceByDate = attendanceByDate;
 
             return View(students);
         }
+
+
 
 
 
@@ -102,33 +124,55 @@ namespace AdminWebPage.Controllers
         public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate)
         {
             var reportData = new List<AttendanceReportViewModel>();
+            var detailedList = new List<dynamic>(); // list of students with date and status
 
             if (startDate == null || endDate == null)
-            {
                 return View(reportData);
-            }
 
-            for (var date = startDate.Value; date <= endDate.Value; date = date.AddDays(1))
+            var students = await _context.Account
+                .Where(a => a.Role == "Student")
+                .ToListAsync();
+
+            for (var date = startDate.Value.Date; date <= endDate.Value.Date; date = date.AddDays(1))
             {
                 var dailyAttendance = await _context.Attendances
-                    .Where(a => a.Date == date)
+                    .Where(a => a.Date >= date && a.Date < date.AddDays(1))
+                    .Include(a => a.Student)
                     .ToListAsync();
 
                 reportData.Add(new AttendanceReportViewModel
                 {
                     Date = date,
-                    TotalStudents = await _context.Account.CountAsync(a => a.Role == "Student"),
+                    TotalStudents = students.Count,
                     PresentCount = dailyAttendance.Count(a => a.Status == "Present"),
                     AbsentCount = dailyAttendance.Count(a => a.Status == "Absent"),
                     LateCount = dailyAttendance.Count(a => a.Status == "Late"),
                 });
+
+                // Fill detailed list
+                foreach (var student in students)
+                {
+                    var status = dailyAttendance.FirstOrDefault(a => a.StudentId == student.AccountID)?.Status ?? "N/A";
+
+                    detailedList.Add(new
+                    {
+                        Date = date.ToString("yyyy-MM-dd"),
+                        student.FName,
+                        student.MName,
+                        student.LName,
+                        Remarks = status
+                    });
+                }
             }
 
+            ViewBag.DetailedList = detailedList;
             ViewBag.StartDate = startDate;
             ViewBag.EndDate = endDate;
 
             return View(reportData);
         }
+
+
 
     }
 }
