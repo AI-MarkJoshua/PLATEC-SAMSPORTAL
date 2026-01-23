@@ -1,0 +1,78 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var data = ViewBag.ChartData;
+}
+
+<h2 class="mb-4">Dashboard</h2>
+
+<!-- SUMMARY CARDS -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3 shadow-sm">
+            <h6>Total Students</h6>
+            <h3>@ViewBag.TotalStudents</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center p-3 shadow-sm">
+            <h6>Total Teachers</h6>
+            <h3>@ViewBag.TotalTeachers</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center p-3 shadow-sm">
+            <h6>Present Today</h6>
+            <h3>@ViewBag.PresentToday</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center p-3 shadow-sm">
+            <h6>Absent Today</h6>
+            <h3>@ViewBag.AbsentToday</h3>
+        </div>
+    </div>
+</div>
+
+
+<!-- VIEW SWITCH -->
+<div class="mb-3">
+    <a class="btn btn-outline-primary btn-sm" href="?view=daily">Daily</a>
+    <a class="btn btn-outline-secondary btn-sm" href="?view=weekly">Weekly</a>
+</div>
+
+<!-- ATTENDANCE CHART -->
+<div class="card p-4 shadow-sm">
+    <canvas id="attendanceChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const chartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data));
+
+    const labels = chartData.map(x => x.Date);
+    const present = chartData.map(x => x.Present);
+    const absent = chartData.map(x => x.Absent);
+    const late = chartData.map(x => x.Late);
+
+    new Chart(document.getElementById('attendanceChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Present', data: present, backgroundColor: '#28a745' },
+                { label: 'Absent', data: absent, backgroundColor: '#dc3545' },
+                { label: 'Late', data: late, backgroundColor: '#ffc107' }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>

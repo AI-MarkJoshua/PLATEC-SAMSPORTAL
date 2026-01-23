@@ -29,8 +29,21 @@
                      style="max-height: 80px;">
             </div>
 
+
+
             <!-- NAV LINKS -->
             <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
+
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-3
+   @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" &&
+     ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                       asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-speedometer2 fs-4"></i>
+                        Dashboard
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-3
    @(ViewContext.RouteData.Values["controller"]?.ToString() == "Accounts" ? "active" : "")"
