@@ -8,34 +8,37 @@
 <!-- SUMMARY CARDS -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-center p-3 shadow-sm">
+        <div class="card summary-card text-center p-3 shadow-sm"
+             style="--accent-color:#9579e1; --accent-color-light:#b49ee7;">
             <h6>Total Students</h6>
             <h3>@ViewBag.TotalStudents</h3>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card text-center p-3 shadow-sm">
+        <div class="card summary-card text-center p-3 shadow-sm"
+             style="--accent-color:#3667c7; --accent-color-light:#3d8ef7;">
             <h6>Total Teachers</h6>
             <h3>@ViewBag.TotalTeachers</h3>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card text-center p-3 shadow-sm">
+        <div class="card summary-card text-center p-3 shadow-sm"
+             style="--accent-color:#1f9e4b; --accent-color-light:#54d261;">
             <h6>Present Today</h6>
             <h3>@ViewBag.PresentToday</h3>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card text-center p-3 shadow-sm">
+        <div class="card summary-card text-center p-3 shadow-sm"
+             style="--accent-color:#f55e5f; --accent-color-light:#f78485;">
             <h6>Absent Today</h6>
             <h3>@ViewBag.AbsentToday</h3>
         </div>
     </div>
 </div>
-
 
 <!-- VIEW SWITCH -->
 <div class="mb-3">
@@ -44,8 +47,8 @@
 </div>
 
 <!-- ATTENDANCE CHART -->
-<div class="card p-4 shadow-sm">
-    <canvas id="attendanceChart"></canvas>
+<div class="card chart-card shadow-sm">
+    <canvas id="attendanceChart" height="510"></canvas> <!-- increased from 120 to 200 -->
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -61,17 +64,22 @@
     new Chart(document.getElementById('attendanceChart'), {
         type: 'bar',
         data: {
-            labels: labels,
+            labels,
             datasets: [
-                { label: 'Present', data: present, backgroundColor: '#28a745' },
-                { label: 'Absent', data: absent, backgroundColor: '#dc3545' },
-                { label: 'Late', data: late, backgroundColor: '#ffc107' }
+                { label:'Present', data: present, backgroundColor:'#1f9e4b', borderRadius:6, barThickness:18 },
+                { label:'Absent', data: absent, backgroundColor:'#f55e5f', borderRadius:6, barThickness:18 },
+                { label:'Late', data: late, backgroundColor:'#ffc107', borderRadius:6, barThickness:18 }
             ]
         },
         options: {
-            responsive: true,
+            responsive:true,
+            plugins: {
+                legend:{ position:'top', labels:{ color:'#20274a', boxWidth:12, font:{ size:12, weight:'500' } } },
+                tooltip:{ backgroundColor:'#20274a', titleColor:'#fff', bodyColor:'#fff', padding:10, cornerRadius:6 }
+            },
             scales: {
-                y: { beginAtZero: true }
+                x:{ grid:{ display:false }, ticks:{ color:'#6c757d' } },
+                y:{ beginAtZero:true, grid:{ color:'#f0f2f5' }, ticks:{ color:'#6c757d' } }
             }
         }
     });

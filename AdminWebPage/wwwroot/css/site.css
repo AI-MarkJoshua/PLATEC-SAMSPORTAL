@@ -186,3 +186,59 @@ body {
     box-shadow: 0 0 0 0.15rem rgba(32, 39, 74, 0.25);
 }
 
+
+.summary-card {
+    position: relative;
+    background: #20274a;
+    color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 110px;
+}
+
+    .summary-card h6 {
+        opacity: 0.9;
+        font-weight: 500;
+    }
+
+    .summary-card h3 {
+        font-weight: 700;
+        margin-top: 6px;
+    }
+
+    /* TOP RIGHT TRIANGLE */
+    .summary-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-top: 70px solid var(--accent-color);
+        border-left: 70px solid transparent;
+    }
+
+    /* BOTTOM RIGHT TRIANGLE */
+    .summary-card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-bottom: 70px solid var(--accent-color-light);
+        border-left: 70px solid transparent;
+    }
+
+
+.chart-card {
+    border-radius: 14px;
+    padding: 24px;
+    background: #ffffff;
+}
+
+.chart-card h5 {
+    color: #20274a;
+}
+
+
