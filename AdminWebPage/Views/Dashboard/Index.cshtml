@@ -8,36 +8,68 @@
 <!-- SUMMARY CARDS -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card summary-card text-center p-3 shadow-sm"
+        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
              style="--accent-color:#9579e1; --accent-color-light:#b49ee7;">
-            <h6>Total Students</h6>
-            <h3>@ViewBag.TotalStudents</h3>
+
+            <!-- ICON -->
+            <div class="me-3 summary-icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
+
+            <!-- TEXT -->
+            <div class="text-start">
+                <h6 class="mb-1">Total Students</h6>
+                <h3 class="mb-0">@ViewBag.TotalStudents</h3>
+            </div>
         </div>
     </div>
 
+
     <div class="col-md-3">
-        <div class="card summary-card text-center p-3 shadow-sm"
+        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
              style="--accent-color:#3667c7; --accent-color-light:#3d8ef7;">
-            <h6>Total Teachers</h6>
-            <h3>@ViewBag.TotalTeachers</h3>
+
+            <div class="me-3 summary-icon">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+
+            <div class="text-start">
+                <h6 class="mb-1">Total Teachers</h6>
+                <h3 class="mb-0">@ViewBag.TotalTeachers</h3>
+            </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card summary-card text-center p-3 shadow-sm"
+        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
              style="--accent-color:#1f9e4b; --accent-color-light:#54d261;">
-            <h6>Present Today</h6>
-            <h3>@ViewBag.PresentToday</h3>
+
+            <div class="me-3 summary-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+
+            <div class="text-start">
+                <h6 class="mb-1">Present Today</h6>
+                <h3 class="mb-0">@ViewBag.PresentToday</h3>
+            </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card summary-card text-center p-3 shadow-sm"
+        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
              style="--accent-color:#f55e5f; --accent-color-light:#f78485;">
-            <h6>Absent Today</h6>
-            <h3>@ViewBag.AbsentToday</h3>
+
+            <div class="me-3 summary-icon">
+                <i class="bi bi-x-circle-fill"></i>
+            </div>
+
+            <div class="text-start">
+                <h6 class="mb-1">Absent Today</h6>
+                <h3 class="mb-0">@ViewBag.AbsentToday</h3>
+            </div>
         </div>
     </div>
+
 </div>
 
 <!-- VIEW SWITCH -->

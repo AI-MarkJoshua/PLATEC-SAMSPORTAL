@@ -40,7 +40,7 @@ namespace AdminWebPage.Controllers
                         HttpContext.Session.SetString("UserRole", account.Role);
                         HttpContext.Session.SetString("Username", account.Username);
 
-                        return RedirectToAction("Index", "Accounts");
+                        return RedirectToAction("Index", "Dashboard");
                     }
                     else
                     {
