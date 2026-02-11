@@ -1,5 +1,5 @@
-﻿using AdminWebPage.Data;
-using AdminWebPage.Models;
+﻿using AdminWebPage.Shared.Data;
+using AdminWebPage.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;

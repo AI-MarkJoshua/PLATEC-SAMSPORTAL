@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using AdminWebPage.Models;
 using Microsoft.EntityFrameworkCore;
-using AdminWebPage.Data;
+using AdminWebPage.Shared.Data;
+using AdminWebPage.Shared.Models;
+
 
 namespace AdminWebPage.Controllers
 {

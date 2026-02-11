@@ -1,4 +1,4 @@
-namespace AdminWebPage.Models
+namespace AdminWebPage.Shared.Models
 {
     public class ErrorViewModel
     {

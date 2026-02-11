@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using AdminWebPage.Data;
-using AdminWebPage.Models;
+using AdminWebPage.Shared.Data;
+using AdminWebPage.Shared.Models;
+
 
 namespace AdminWebPage.Controllers
 {

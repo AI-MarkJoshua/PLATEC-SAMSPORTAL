@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using AdminWebPage.Data;
+using AdminWebPage.Shared.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AdminWebPageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdminWebPageContext") ?? throw new InvalidOperationException("Connection string 'AdminWebPageContext' not found.")));
