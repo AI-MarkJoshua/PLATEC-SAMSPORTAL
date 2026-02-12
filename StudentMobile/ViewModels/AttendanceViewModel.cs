@@ -27,12 +27,26 @@ namespace StudentMobile.ViewModels
         {
             IsLoading = true;
 
-            if (Preferences.ContainsKey("StudentId"))
+            try
             {
-                int studentId = Preferences.Get("StudentId", 0);
-                AttendanceRecords = await _apiService.GetMyAttendanceAsync(studentId);
+                if (Preferences.ContainsKey("StudentId"))
+                {
+                    int studentId = Preferences.Get("StudentId", 0);
+                    System.Diagnostics.Debug.WriteLine($"Loading attendance for StudentId: {studentId}");
+                    
+                    AttendanceRecords = await _apiService.GetMyAttendanceAsync(studentId);
+                    
+                    System.Diagnostics.Debug.WriteLine($"Loaded {AttendanceRecords.Count} attendance records");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("No StudentId found in preferences");
+                }
             }
-
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading attendance: {ex.Message}");
+            }
 
             IsLoading = false;
         }
