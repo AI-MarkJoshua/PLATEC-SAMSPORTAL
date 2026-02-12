@@ -3,7 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using AdminWebPage.Shared.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AdminWebPageContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AdminWebPageContext") ?? throw new InvalidOperationException("Connection string 'AdminWebPageContext' not found.")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AdminWebPageContext") ?? throw new InvalidOperationException("Connection string 'AdminWebPageContext' not found."), 
+    b => b.MigrationsAssembly("AdminWebPage")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
