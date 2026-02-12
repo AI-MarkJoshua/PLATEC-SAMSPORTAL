@@ -1,0 +1,30 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:StudentMobile.ViewModels"
+             x:Class="StudentMobile.Views.AttendancePage">
+
+    <ContentPage.BindingContext>
+        <viewmodels:AttendanceViewModel/>
+    </ContentPage.BindingContext>
+
+    <VerticalStackLayout Padding="20">
+
+        <Button Text="Load Students"
+                Command="{Binding LoadCommand}" />
+
+        <CollectionView ItemsSource="{Binding Students}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="5">
+                        <Label Text="{Binding FullName}" />
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Text="Save Attendance"
+                Command="{Binding SaveCommand}" />
+
+    </VerticalStackLayout>
+
+</ContentPage>
