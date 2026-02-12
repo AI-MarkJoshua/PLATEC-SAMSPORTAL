@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace StudentMobile.Models
 {
-    public class Student
+    public class LoginResponse
     {
         public int AccountID { get; set; }
         public string Username { get; set; }
-        public string FName { get; set; }
-        public string MName { get; set; }
-        public string LName { get; set; }   
+        public string Role { get; set; }
     }
 }

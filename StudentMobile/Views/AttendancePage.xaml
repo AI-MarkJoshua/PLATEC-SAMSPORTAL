@@ -1,30 +1,24 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewmodels="clr-namespace:StudentMobile.ViewModels"
+             xmlns:vm="clr-namespace:StudentMobile.ViewModels"
              x:Class="StudentMobile.Views.AttendancePage">
 
     <ContentPage.BindingContext>
-        <viewmodels:AttendanceViewModel/>
+        <vm:AttendanceViewModel/>
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout Padding="20">
-
-        <Button Text="Load Students"
-                Command="{Binding LoadCommand}" />
-
-        <CollectionView ItemsSource="{Binding Students}">
+    <StackLayout Padding="20">
+        <Label Text="My Attendance" FontSize="20" HorizontalOptions="Center"/>
+        <CollectionView ItemsSource="{Binding AttendanceRecords}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Margin="5">
-                        <Label Text="{Binding FullName}" />
-                    </Frame>
+                    <StackLayout Orientation="Horizontal" Padding="10">
+                        <Label Text="{Binding Date, StringFormat='{0:MMM dd, yyyy}'}" WidthRequest="120"/>
+                        <Label Text="{Binding Status}" HorizontalOptions="StartAndExpand"/>
+                    </StackLayout>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
-        <Button Text="Save Attendance"
-                Command="{Binding SaveCommand}" />
-
-    </VerticalStackLayout>
-
+        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
+    </StackLayout>
 </ContentPage>

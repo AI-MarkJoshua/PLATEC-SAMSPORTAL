@@ -1,62 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-using System.Windows.Input;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using StudentMobile.Models;
 using StudentMobile.Services;
+using Microsoft.Maui.Storage;
+
 
 namespace StudentMobile.ViewModels
 {
-    public class AttendanceViewModel : BindableObject
+    public partial class AttendanceViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
 
-        public ObservableCollection<Student> Students { get; set; }
-        public ObservableCollection<string> StatusOptions { get; set; }
+        [ObservableProperty]
+        private List<AttendanceRecord> attendanceRecords = new();
 
-        public ICommand LoadCommand { get; }
-        public ICommand SaveCommand { get; }
+        [ObservableProperty]
+        private bool isLoading;
 
         public AttendanceViewModel()
         {
             _apiService = new ApiService();
-
-            Students = new ObservableCollection<Student>();
-            StatusOptions = new ObservableCollection<string>
-            {
-                "Present",
-                "Absent"
-            };
-
-            LoadCommand = new Command(async () => await LoadStudents());
-            SaveCommand = new Command(async () => await SaveAttendance());
         }
 
-        private async Task LoadStudents()
+        [RelayCommand]
+        public async Task LoadAttendanceAsync()
         {
-            var students = await _apiService.GetStudentsAsync();
-            Students.Clear();
+            IsLoading = true;
 
-            foreach (var student in students)
+            if (Preferences.ContainsKey("StudentId"))
             {
-                Students.Add(student);
+                int studentId = Preferences.Get("StudentId", 0);
+                AttendanceRecords = await _apiService.GetMyAttendanceAsync(studentId);
             }
-        }
 
-        private async Task SaveAttendance()
-        {
-            var attendanceList = Students.Select(s => new AttendanceDto
-            {
-                StudentId = s.AccountID,
-                Status = "Present", // default for now
-                Date = DateTime.Today
-            }).ToList();
 
-            await _apiService.MarkAllAttendanceAsync(attendanceList);
+            IsLoading = false;
         }
     }
 }
-

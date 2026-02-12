@@ -6,7 +6,7 @@
         {
             InitializeComponent();
 
-            MainPage = new Views.AttendancePage();
+            MainPage = new Views.LoginPage();
 
         }
     }

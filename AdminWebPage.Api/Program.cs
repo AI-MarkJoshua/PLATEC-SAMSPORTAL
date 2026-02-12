@@ -8,6 +8,16 @@ builder.Services.AddDbContext<AdminWebPageContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("AdminWebPageContext")));
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMobileApp", policy =>
+    {
+        policy.WithOrigins("https://10.0.2.2:7298", "http://10.0.2.2:7298", "http://localhost:5156", "https://localhost:5156")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -24,6 +34,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowMobileApp");
 
 app.UseAuthorization();
 

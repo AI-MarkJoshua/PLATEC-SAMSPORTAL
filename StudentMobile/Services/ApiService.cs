@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json;
 using StudentMobile.Models;
 
@@ -11,41 +8,66 @@ namespace StudentMobile.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-
-        //private const string BaseUrl = "https://10.0.2.2:7298/api/";
-        private const string BaseUrl = "https://localhost:7298/api/";
+        private const string BaseUrl = "http://localhost:5156/api/";
 
         public ApiService()
         {
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-            };
-            _httpClient = new HttpClient(handler);
+            _httpClient = new HttpClient();
         }
 
-        public async Task<List<Student>> GetStudentsAsync()
+        public async Task<bool> TestConnectionAsync()
         {
-            var response = await _httpClient.GetAsync($"{BaseUrl}attendance/students");
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseUrl}weatherforecast");
+                System.Diagnostics.Debug.WriteLine($"Test Connection Response: {response.StatusCode}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Test Connection Exception: {ex.Message}");
+                return false;
+            }
+        }
 
-            if (!response.IsSuccessStatusCode)
-                return new List<Student>();
+        public async Task<LoginResponse?> LoginAsync(LoginRequest login)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(login);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync($"{BaseUrl}account/login", content);
+
+                if (!response.IsSuccessStatusCode) 
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"API Error: {response.StatusCode} - {errorContent}");
+                    return null;
+                }
+
+                var responseJson = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"API Response: {responseJson}");
+                
+                return JsonSerializer.Deserialize<LoginResponse>(responseJson,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Exception: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<List<AttendanceRecord>> GetMyAttendanceAsync(int studentId)
+        {
+            var response = await _httpClient.GetAsync($"{BaseUrl}attendance/mine/{studentId}");
+
+            if (!response.IsSuccessStatusCode) return new List<AttendanceRecord>();
 
             var json = await response.Content.ReadAsStringAsync();
-
-            return JsonSerializer.Deserialize<List<Student>>(json,
+            return JsonSerializer.Deserialize<List<AttendanceRecord>>(json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
-
-        public async Task<bool> MarkAllAttendanceAsync(List<AttendanceDto> attendances)
-        {
-            var json = JsonSerializer.Serialize(attendances);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync($"{BaseUrl}attendance/markall", content);
-
-            return response.IsSuccessStatusCode;
-        }
     }
-
 }

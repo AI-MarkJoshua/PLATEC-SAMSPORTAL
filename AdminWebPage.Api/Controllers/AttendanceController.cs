@@ -16,23 +16,22 @@ namespace AdminWebPage.Api.Controllers
             _context = context;
         }
 
-        // GET: api/attendance/students
-        [HttpGet("students")]
-        public async Task<IActionResult> GetStudents()
+        // GET: api/attendance/mine/{studentId}
+        [HttpGet("mine/{studentId}")]
+        public async Task<IActionResult> GetMyAttendance(int studentId)
         {
-            var students = await _context.Account
-                .Where(a => a.Role == "Student")
+            var attendance = await _context.Attendances
+                .Where(a => a.StudentId == studentId)
                 .Select(a => new
                 {
-                    a.AccountID,
-                    a.FName,
-                    a.MName,
-                    a.LName
+                    a.Date,
+                    a.Status
                 })
                 .ToListAsync();
 
-            return Ok(students);
+            return Ok(attendance);
         }
+
 
         // POST: api/attendance/mark
         [HttpPost("mark")]
