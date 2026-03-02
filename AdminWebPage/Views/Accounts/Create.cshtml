@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Create Account";
+    var userRole = Context.Session.GetString("UserRole");
 }
 
 <h2 class="mb-4">Create Account</h2>
@@ -85,10 +86,39 @@
                     <label asp-for="Role" class="form-label">Role</label>
                     <select asp-for="Role" class="form-select rounded-20">
                         <option value="">-- Select Role --</option>
-                        <option value="Teacher">Teacher</option>
+                        
+                        @if (userRole == "Admin" || userRole == "Student")
+                        {
+                            <option value="Admin">Admin</option>
+                        }
+                        
+                        @if (userRole == "Admin" || userRole == "Student")
+                        {
+                            <option value="Teacher">Teacher</option>
+                        }
+                        
                         <option value="Student">Student</option>
                     </select>
                     <span asp-validation-for="Role" class="text-danger"></span>
+                    
+                    @if (userRole == "Teacher")
+                    {
+                        <small class="text-muted d-block mt-1">
+                            Teachers can only create Student accounts.
+                        </small>
+                    }
+                    else if (userRole == "Student")
+                    {
+                        <small class="text-muted d-block mt-1">
+                            Students can create Admin, Teacher, and Student accounts.
+                        </small>
+                    }
+                    else if (userRole == "Admin")
+                    {
+                        <small class="text-muted d-block mt-1">
+                            Admins can create all account types.
+                        </small>
+                    }
                 </div>
             </div>
 

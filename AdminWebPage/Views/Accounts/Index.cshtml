@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Account List";
+    var userRole = Context.Session.GetString("UserRole");
 }
 
 <h2 class="mb-4">Account List</h2>
@@ -31,6 +32,12 @@
                             class="form-select rounded-20"
                             onchange="this.form.submit()">
                         <option value="">All Roles</option>
+                        
+                        @if (userRole == "Admin" || userRole == "Student")
+                        {
+                            <option value="Admin" selected="@(ViewBag.Role == "Admin")">Admin</option>
+                        }
+                        
                         <option value="Teacher" selected="@(ViewBag.Role == "Teacher")">Teacher</option>
                         <option value="Student" selected="@(ViewBag.Role == "Student")">Student</option>
                     </select>
@@ -81,17 +88,24 @@
                     <td>@item.Username</td>
                     <td>@item.Email</td>
                     <td>
-                        @if (item.Role == "Teacher")
+                        @if (item.Role == "Admin")
                         {
                             <span class="badge rounded-20"
-                                  style="background-color: #d4edda; color: #28a745; font-weight: 600;">
+                                  style="background-color:#f8d7da; color:#dc3545; font-weight:600;">
+                                ● Admin
+                            </span>
+                        }
+                        else if (item.Role == "Teacher")
+                        {
+                            <span class="badge rounded-20"
+                                  style="background-color:#d4edda; color:#28a745; font-weight:600;">
                                 ● Teacher
                             </span>
                         }
                         else if (item.Role == "Student")
                         {
                             <span class="badge rounded-20"
-                                  style="background-color: #cce5ff; color: #007bff; font-weight: 600;">
+                                  style="background-color:#cce5ff; color:#007bff; font-weight:600;">
                                 ● Student
                             </span>
                         }

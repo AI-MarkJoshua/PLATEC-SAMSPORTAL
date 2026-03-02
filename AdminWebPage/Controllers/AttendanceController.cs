@@ -18,11 +18,27 @@ namespace AdminWebPage.Controllers
         // GET: Attendance
         public async Task<IActionResult> Index(DateTime? selectedDate)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions - Admin, Student, and Teacher can access
+            if (userRole != "Admin" && userRole != "Student" && userRole != "Teacher")
+            {
+                TempData["Error"] = "Access Denied.";
+                return RedirectToAction("Login", "Auth");
+            }
+
             ViewBag.SelectedDate = selectedDate;
 
-            var students = await _context.Account
-                .Where(a => a.Role == "Student")
-                .ToListAsync();
+            var studentsQuery = _context.Account.Where(a => a.Role == "Student");
+            
+            // If user is Teacher, only show students assigned to them
+            if (userRole == "Teacher")
+            {
+                studentsQuery = studentsQuery.Where(a => a.TeacherID == accountId);
+            }
+            
+            var students = await studentsQuery.ToListAsync();
 
             // Load attendance for selected date
             var attendanceDict = new Dictionary<int, string>();
@@ -67,6 +83,27 @@ namespace AdminWebPage.Controllers
         [HttpPost]
         public async Task<IActionResult> Mark(int studentId, string status, DateTime date)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions - Admin and Student have full access, Teacher limited access
+            if (userRole != "Admin" && userRole != "Student" && userRole != "Teacher")
+            {
+                TempData["Error"] = "Access Denied.";
+                return RedirectToAction("Index", new { selectedDate = date });
+            }
+            
+            // If user is Teacher, verify the student is assigned to them
+            if (userRole == "Teacher")
+            {
+                var student = await _context.Account.FindAsync(studentId);
+                if (student?.TeacherID != accountId)
+                {
+                    TempData["Error"] = "Access Denied: You can only mark attendance for students assigned to you.";
+                    return RedirectToAction("Index", new { selectedDate = date });
+                }
+            }
+            // Admin and Student have full access - no additional checks needed
             var existing = await _context.Attendances
                 .FirstOrDefaultAsync(a => a.StudentId == studentId && a.Date == date);
 
@@ -95,8 +132,27 @@ namespace AdminWebPage.Controllers
         [HttpPost]
         public async Task<IActionResult> MarkAll([FromBody] List<AttendanceDto> attendances)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions - Admin and Student have full access, Teacher limited access
+            if (userRole != "Admin" && userRole != "Student" && userRole != "Teacher")
+            {
+                return BadRequest("Access Denied.");
+            }
+            
             foreach (var item in attendances)
             {
+                // If user is Teacher, verify the student is assigned to them
+                if (userRole == "Teacher")
+                {
+                    var student = await _context.Account.FindAsync(item.StudentId);
+                    if (student?.TeacherID != accountId)
+                    {
+                        continue; // Skip students not assigned to this teacher
+                    }
+                }
+                // Admin and Student have full access - no additional checks needed
                 var existing = await _context.Attendances
                     .FirstOrDefaultAsync(a => a.StudentId == item.StudentId
                                            && a.Date >= item.Date.Date
@@ -123,15 +179,31 @@ namespace AdminWebPage.Controllers
         }
         public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions - Admin, Student, and Teacher can access reports
+            if (userRole != "Admin" && userRole != "Student" && userRole != "Teacher")
+            {
+                TempData["Error"] = "Access Denied.";
+                return RedirectToAction("Login", "Auth");
+            }
+
             var reportData = new List<AttendanceReportViewModel>();
-            var detailedList = new List<dynamic>(); // list of students with date and status
+            var detailedList = new List<dynamic>();
 
             if (startDate == null || endDate == null)
                 return View(reportData);
 
-            var students = await _context.Account
-                .Where(a => a.Role == "Student")
-                .ToListAsync();
+            var studentsQuery = _context.Account.Where(a => a.Role == "Student");
+            
+            // If user is Teacher, only show students assigned to them
+            if (userRole == "Teacher")
+            {
+                studentsQuery = studentsQuery.Where(a => a.TeacherID == accountId);
+            }
+            
+            var students = await studentsQuery.ToListAsync();
 
             for (var date = startDate.Value.Date; date <= endDate.Value.Date; date = date.AddDays(1))
             {

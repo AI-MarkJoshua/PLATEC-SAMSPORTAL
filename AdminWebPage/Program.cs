@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using AdminWebPage.Shared.Data;
+using AdminWebPage.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AdminWebPageContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdminWebPageContext") ?? throw new InvalidOperationException("Connection string 'AdminWebPageContext' not found."), 
@@ -32,5 +33,12 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
+
+// Initialize database with seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AdminWebPageContext>();
+    await DbInitializer.Initialize(context);
+}
 
 app.Run();

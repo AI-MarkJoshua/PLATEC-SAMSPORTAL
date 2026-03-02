@@ -26,26 +26,38 @@ namespace AdminWebPage.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Trim and validate input
+                var username = model.Username?.Trim();
+                var password = model.Password?.Trim();
+                
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+                {
+                    ViewBag.Error = "Username and password are required";
+                    return View(model);
+                }
+
                 var account = await _context.Account
-     .AsNoTracking()
-     .FirstOrDefaultAsync(a =>
-         a.Username == model.Username &&
-         a.Password == model.Password);
+    .AsNoTracking()
+    .FirstOrDefaultAsync(a =>
+        EF.Functions.Collate(a.Username, "SQL_Latin1_General_CP1_CS_AS") == username &&
+        EF.Functions.Collate(a.Password, "SQL_Latin1_General_CP1_CS_AS") == password);
 
 
                 if (account != null)
                 {
-                    if (account.Role == "Teacher")
-                    {
-                        HttpContext.Session.SetString("UserRole", account.Role);
-                        HttpContext.Session.SetString("Username", account.Username);
+                    // Allow all roles to login
+                    HttpContext.Session.SetString("UserRole", account.Role);
+                    HttpContext.Session.SetString("Username", account.Username);
+                    HttpContext.Session.SetInt32("AccountID", account.AccountID);
 
-                        return RedirectToAction("Index", "Dashboard");
-                    }
-                    else
+                    // Redirect based on role
+                    return account.Role switch
                     {
-                        ViewBag.Error = "Access Restricted: Students cannot log in.";
-                    }
+                        "Admin" => RedirectToAction("Index", "Dashboard"),
+                        "Teacher" => RedirectToAction("Index", "Dashboard"),
+                        "Student" => RedirectToAction("Index", "Dashboard"),
+                        _ => RedirectToAction("Login", "Auth")
+                    };
                 }
                 else
                 {

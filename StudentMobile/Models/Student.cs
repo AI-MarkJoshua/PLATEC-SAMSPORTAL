@@ -11,7 +11,7 @@ namespace StudentMobile.Models
         public int AccountID { get; set; }
         public string Username { get; set; }
         public string FName { get; set; }
-        public string MName { get; set; }
+        public string? MName { get; set; }
         public string LName { get; set; }   
     }
 }

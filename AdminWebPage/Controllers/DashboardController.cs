@@ -16,12 +16,47 @@ namespace AdminWebPage.Controllers
 
         public async Task<IActionResult> Index(string view = "daily")
         {
-            // 🔢 COUNTS
-            ViewBag.TotalStudents = await _context.Account
-                .CountAsync(a => a.Role == "Student");
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check if user is logged in
+            if (string.IsNullOrEmpty(userRole))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
 
-            ViewBag.TotalTeachers = await _context.Account
-                .CountAsync(a => a.Role == "Teacher");
+            // 🔢 COUNTS - Different based on role
+            if (userRole == "Admin")
+            {
+                ViewBag.TotalStudents = await _context.Account
+                    .CountAsync(a => a.Role == "Student");
+
+                ViewBag.TotalTeachers = await _context.Account
+                    .CountAsync(a => a.Role == "Teacher");
+
+                ViewBag.TotalAdmins = await _context.Account
+                    .CountAsync(a => a.Role == "Admin");
+            }
+            else if (userRole == "Teacher")
+            {
+                ViewBag.TotalStudents = await _context.Account
+                    .CountAsync(a => a.Role == "Student" && a.TeacherID == accountId);
+                    
+                ViewBag.TotalTeachers = 1; // Only themselves
+                ViewBag.TotalAdmins = await _context.Account
+                    .CountAsync(a => a.Role == "Admin");
+            }
+            else // Student
+            {
+                ViewBag.TotalStudents = await _context.Account
+                    .CountAsync(a => a.Role == "Student");
+
+                ViewBag.TotalTeachers = await _context.Account
+                    .CountAsync(a => a.Role == "Teacher");
+
+                ViewBag.TotalAdmins = await _context.Account
+                    .CountAsync(a => a.Role == "Admin");
+            }
 
             // ✅ NEW: TODAY PRESENT & ABSENT
             var today = DateTime.Today;

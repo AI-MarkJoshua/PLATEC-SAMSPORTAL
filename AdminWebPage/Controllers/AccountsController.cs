@@ -25,15 +25,25 @@ namespace AdminWebPage.Controllers
         public async Task<IActionResult> Index(string search, string role, int page = 1)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
-            if (userRole != "Teacher")
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Only Admin, Teacher, and Student can access this page
+            if (userRole != "Admin" && userRole != "Teacher" && userRole != "Student")
             {
-                TempData["Error"] = "Access Denied: Only teachers can access this page.";
+                TempData["Error"] = "Access Denied.";
                 return RedirectToAction("Login", "Auth");
             }
 
             int pageSize = 10;
-
             var accounts = _context.Account.AsQueryable();
+
+            // Filter based on user role
+            if (userRole == "Teacher")
+            {
+                // Teachers can only see students assigned to them
+                accounts = accounts.Where(a => a.TeacherID == accountId);
+            }
+            // Admin and Student can see all accounts
 
             // 🔍 Search
             if (!string.IsNullOrEmpty(search))
@@ -138,8 +148,41 @@ namespace AdminWebPage.Controllers
         // POST: Accounts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AccountID,FName,MName,LName,Username,Email,Password,Role")] Account account)
+        public async Task<IActionResult> Create([Bind("AccountID,FName,MName,LName,Username,Email,Password,Role,TeacherID")] Account account)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions based on user role
+            if (userRole == "Teacher")
+            {
+                // Teachers can only create students
+                if (account.Role != "Student")
+                {
+                    ModelState.AddModelError("Role", "Teachers can only create student accounts.");
+                    return View(account);
+                }
+                // Assign the teacher ID to the student
+                account.TeacherID = accountId;
+            }
+            else if (userRole == "Student")
+            {
+                // Students have super user access - can create admin, teacher, and student accounts
+                if (account.Role != "Admin" && account.Role != "Teacher" && account.Role != "Student")
+                {
+                    ModelState.AddModelError("Role", "Invalid role selected.");
+                    return View(account);
+                }
+                // Students don't assign TeacherID (null for admin/teacher, will be set for students)
+                if (account.Role == "Student")
+                {
+                    // If student creates another student, you might want to assign them to a teacher
+                    // For now, leave TeacherID null - you can modify this logic as needed
+                    account.TeacherID = null;
+                }
+            }
+            // Admin can create any role (no restrictions)
+
             if (ModelState.IsValid)
             {
                 _context.Add(account);
@@ -147,7 +190,6 @@ namespace AdminWebPage.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(account);
-
         }
 
         // GET: Accounts/Edit/5
@@ -171,8 +213,32 @@ namespace AdminWebPage.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("AccountID,FName,MName,LName,Username,Email,Password,Role")] Account account)
+        public async Task<IActionResult> Edit(int id, [Bind("AccountID,FName,MName,LName,Username,Email,Password,Role,TeacherID")] Account account)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions
+            if (userRole == "Teacher")
+            {
+                // Teachers can only edit students assigned to them
+                var targetAccount = await _context.Account.FindAsync(id);
+                if (targetAccount == null || targetAccount.TeacherID != accountId)
+                {
+                    TempData["Error"] = "Access Denied: You can only edit students assigned to you.";
+                    return RedirectToAction(nameof(Index));
+                }
+                // Teachers cannot change the role
+                account.Role = targetAccount.Role;
+                account.TeacherID = accountId;
+            }
+            else if (userRole == "Student")
+            {
+                // Students have full access - can edit any account
+                // No restrictions for students
+            }
+            // Admin can edit any account
+
             if (id != account.AccountID)
             {
                 return NotFound();
@@ -224,13 +290,28 @@ namespace AdminWebPage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
             var account = await _context.Account.FindAsync(id);
             if (account != null)
             {
+                // Check permissions
+                if (userRole == "Teacher")
+                {
+                    // Teachers can only delete students assigned to them
+                    if (account.TeacherID != accountId)
+                    {
+                        TempData["Error"] = "Access Denied: You can only delete students assigned to you.";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                // Students and Admins can delete any account
+                
                 _context.Account.Remove(account);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

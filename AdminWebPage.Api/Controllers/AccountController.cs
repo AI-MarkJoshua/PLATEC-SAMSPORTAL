@@ -29,9 +29,13 @@ namespace AdminWebPage.Api.Controllers
             {
                 return BadRequest("Username and password are required");
             }
+            
+            // Trim input to prevent issues with spaces
+            var username = loginRequest.Username.Trim();
+            var password = loginRequest.Password.Trim();
 
             var account = await _context.Account
-                .FirstOrDefaultAsync(a => a.Username == loginRequest.Username && a.Password == loginRequest.Password);
+                .FirstOrDefaultAsync(a => a.Username == username && a.Password == password);
 
             if (account == null)
             {
@@ -42,7 +46,11 @@ namespace AdminWebPage.Api.Controllers
             {
                 AccountID = account.AccountID,
                 Username = account.Username,
-                Role = account.Role
+                Role = account.Role,
+                FName = account.FName,
+                LName = account.LName,
+                Email = account.Email,
+                TeacherID = account.TeacherID
             };
 
             return Ok(response);
