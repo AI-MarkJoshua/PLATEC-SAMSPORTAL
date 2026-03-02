@@ -16,7 +16,7 @@ namespace AdminWebPage.Controllers
             _context = context;
         }
         // GET: Attendance
-        public async Task<IActionResult> Index(DateTime? selectedDate)
+        public async Task<IActionResult> Index(DateTime? selectedDate, int? selectedSectionId)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             var accountId = HttpContext.Session.GetInt32("AccountID");
@@ -29,13 +29,43 @@ namespace AdminWebPage.Controllers
             }
 
             ViewBag.SelectedDate = selectedDate;
+            ViewBag.SelectedSectionId = selectedSectionId;
 
             var studentsQuery = _context.Accounts.Where(a => a.Role == "Student");
             
-            // If user is Teacher, only show students assigned to them
+            // If user is Teacher, only show students assigned to them and filter by section
             if (userRole == "Teacher")
             {
                 studentsQuery = studentsQuery.Where(a => a.TeacherID == accountId);
+                
+                // Get teacher's assigned sections for dropdown
+                var teacherSections = await _context.TeacherSections
+                    .Where(ts => ts.TeacherID == accountId)
+                    .Include(ts => ts.Section)
+                    .ToListAsync();
+                
+                ViewBag.TeacherSections = teacherSections;
+                
+                // If a section is selected, filter students by that section
+                if (selectedSectionId.HasValue)
+                {
+                    studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                }
+            }
+            else
+            {
+                // For Admin and Student, get all sections
+                var allSections = await _context.Sections
+                    .OrderBy(s => s.SectionName)
+                    .ToListAsync();
+                
+                ViewBag.TeacherSections = allSections.Select(s => new { SectionID = s.SectionID, Section = s }).ToList();
+                
+                // If a section is selected, filter students by that section
+                if (selectedSectionId.HasValue)
+                {
+                    studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                }
             }
             
             var students = await studentsQuery.ToListAsync();

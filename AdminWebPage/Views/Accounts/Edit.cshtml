@@ -143,9 +143,25 @@
                         <select id="sectionSelect" class="form-select rounded-20" name="selectedSectionId">
                             <option value="">-- No Section (Unassigned) --</option>
                             @{
-                                var sections = await _context.Sections
-                                    .OrderBy(s => s.SectionName)
-                                    .ToListAsync();
+                                List<Section> sections;
+                                if (userRole == "Teacher")
+                                {
+                                    // Teacher can only assign students to their assigned sections
+                                    var teacherId = Context.Session.GetInt32("AccountID");
+                                    sections = await _context.TeacherSections
+                                        .Where(ts => ts.TeacherID == teacherId)
+                                        .Include(ts => ts.Section)
+                                        .Select(ts => ts.Section)
+                                        .OrderBy(s => s.SectionName)
+                                        .ToListAsync();
+                                }
+                                else
+                                {
+                                    // Admin and Student can see all sections
+                                    sections = await _context.Sections
+                                        .OrderBy(s => s.SectionName)
+                                        .ToListAsync();
+                                }
                                 
                                 foreach (var sectionItem in sections)
                                 {
