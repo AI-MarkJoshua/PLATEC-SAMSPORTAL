@@ -1,4 +1,7 @@
 ﻿@model AdminWebPage.Shared.Models.Account
+@inject AdminWebPage.Shared.Data.AdminWebPageContext _context
+@using System.Linq
+@using Microsoft.EntityFrameworkCore
 
 @{
     ViewData["Title"] = "Create Account";
@@ -84,7 +87,7 @@
 
                 <div class="col-md-6">
                     <label asp-for="Role" class="form-label">Role</label>
-                    <select asp-for="Role" class="form-select rounded-20">
+                    <select asp-for="Role" class="form-select rounded-20" id="roleSelect">
                         <option value="">-- Select Role --</option>
                         
                         @if (userRole == "Admin" || userRole == "Student")
@@ -100,25 +103,34 @@
                         <option value="Student">Student</option>
                     </select>
                     <span asp-validation-for="Role" class="text-danger"></span>
-                    
-                    @if (userRole == "Teacher")
-                    {
-                        <small class="text-muted d-block mt-1">
-                            Teachers can only create Student accounts.
-                        </small>
-                    }
-                    else if (userRole == "Student")
-                    {
-                        <small class="text-muted d-block mt-1">
-                            Students can create Admin, Teacher, and Student accounts.
-                        </small>
-                    }
-                    else if (userRole == "Admin")
-                    {
-                        <small class="text-muted d-block mt-1">
-                            Admins can create all account types.
-                        </small>
-                    }
+                </div>
+                
+                <!-- Teacher Assignment Section (only for Admin creating Student) -->
+                <div id="teacherAssignmentSection" class="col-md-12" style="display: none;">
+                    <h5 class="mb-3 text-secondary">Assign to Teacher</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label">Select Teacher (Optional)</label>
+                            <select id="teacherSelect" class="form-select rounded-20" name="selectedTeacherId">
+                                <option value="">-- No Teacher (Unassigned) --</option>
+                                @{
+                                    var teachers = await _context.Account
+                                        .Where(a => a.Role == "Teacher")
+                                        .OrderBy(a => a.LName)
+                                        .ThenBy(a => a.FName)
+                                        .ToListAsync();
+                                    
+                                    foreach (var teacher in teachers)
+                                    {
+                                        <option value="@teacher.AccountID">@teacher.FName @teacher.LName (@teacher.Username)</option>
+                                    }
+                                }
+                            </select>
+                            <small class="text-muted d-block mt-1">
+                                Assign this student to a teacher for supervision. Leave unassigned if not needed.
+                            </small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -135,7 +147,28 @@
                     Create Account
                 </button>
             </div>
-
+            
+            <!-- Role-based Messages -->
+            <div class="col-md-12 mt-2">
+                @if (userRole == "Teacher")
+                {
+                    <small class="text-muted">
+                        Teachers can only create Student accounts. Students will be automatically assigned to you.
+                    </small>
+                }
+                else if (userRole == "Student")
+                {
+                    <small class="text-muted">
+                        Students can create Admin, Teacher, and Student accounts.
+                    </small>
+                }
+                else if (userRole == "Admin")
+                {
+                    <small class="text-muted">
+                        Admins can create all account types. Students can be assigned to teachers for supervision.
+                    </small>
+                }
+            </div>
         </form>
 
     </div>
@@ -156,5 +189,26 @@
                 })
                 .catch(() => alert("Failed to generate account."));
         }
+
+        // Show/hide teacher assignment section based on role and selected role
+        document.getElementById('roleSelect').addEventListener('change', function() {
+            const selectedRole = this.value;
+            const teacherSection = document.getElementById('teacherAssignmentSection');
+            const userRole = '@userRole';
+            
+            if (userRole === 'Admin' && selectedRole === 'Student') {
+                teacherSection.style.display = 'block';
+            } else {
+                teacherSection.style.display = 'none';
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('roleSelect');
+            if (roleSelect) {
+                roleSelect.dispatchEvent(new Event('change'));
+            }
+        });
     </script>
 }

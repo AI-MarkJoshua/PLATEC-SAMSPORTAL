@@ -148,7 +148,7 @@ namespace AdminWebPage.Controllers
         // POST: Accounts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AccountID,FName,MName,LName,Username,Email,Password,Role,TeacherID")] Account account)
+        public async Task<IActionResult> Create([Bind("AccountID,FName,MName,LName,Username,Email,Password,Role,TeacherID")] Account account, int? selectedTeacherId = null)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             var accountId = HttpContext.Session.GetInt32("AccountID");
@@ -178,10 +178,18 @@ namespace AdminWebPage.Controllers
                 {
                     // If student creates another student, you might want to assign them to a teacher
                     // For now, leave TeacherID null - you can modify this logic as needed
-                    account.TeacherID = null;
+                    account.TeacherID = selectedTeacherId;
                 }
             }
-            // Admin can create any role (no restrictions)
+            else if (userRole == "Admin")
+            {
+                // Admin can create any role (no restrictions)
+                if (account.Role == "Student")
+                {
+                    // Admin creating student can assign to teacher
+                    account.TeacherID = selectedTeacherId;
+                }
+            }
 
             if (ModelState.IsValid)
             {
