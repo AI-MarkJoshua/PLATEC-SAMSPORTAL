@@ -1,0 +1,63 @@
+@model AdminWebPage.Shared.Models.Section
+
+@{
+    ViewData["Title"] = "Delete Classroom";
+}
+
+<h2 class="mb-4">Delete Classroom</h2>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <div class="bg-white p-4 rounded-20 shadow-sm">
+            <h5 class="text-danger mb-3">Are you sure you want to delete this classroom?</h5>
+            
+            <div class="mb-4">
+                <p><strong>Classroom Name:</strong> @Model.SectionName</p>
+                <p><strong>Created Date:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+                
+                @{
+                    var teacherCount = Model.TeacherSections?.Count ?? 0;
+                    if (teacherCount > 0)
+                    {
+                        <div class="alert alert-warning rounded-20">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Warning:</strong> @teacherCount teacher(s) are assigned to this classroom. 
+                            You must remove these assignments before deleting this classroom.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info rounded-20">
+                            <i class="bi bi-info-circle"></i>
+                            No teachers are currently assigned to this classroom.
+                        </div>
+                    }
+                }
+            </div>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="SectionID" />
+                
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-light rounded-20">
+                        Cancel
+                    </a>
+                    @if (teacherCount == 0)
+                    {
+                        <button type="submit" class="btn btn-danger rounded-20">
+                            <i class="bi bi-trash"></i> Delete Classroom
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-danger rounded-20" disabled>
+                            <i class="bi bi-trash"></i> Cannot Delete
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>

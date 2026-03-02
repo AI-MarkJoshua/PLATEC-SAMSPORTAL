@@ -36,7 +36,7 @@ namespace AdminWebPage.Controllers
                     return View(model);
                 }
 
-                var account = await _context.Account
+                var account = await _context.Accounts
     .AsNoTracking()
     .FirstOrDefaultAsync(a =>
         EF.Functions.Collate(a.Username, "SQL_Latin1_General_CP1_CS_AS") == username &&
@@ -45,7 +45,14 @@ namespace AdminWebPage.Controllers
 
                 if (account != null)
                 {
-                    // Allow all roles to login
+                    // Check if user is trying to login via web interface
+                    if (account.Role == "Student")
+                    {
+                        ViewBag.Error = "Students can only access the system via the mobile application.";
+                        return View(model);
+                    }
+                    
+                    // Allow Admin and Teacher to login via web interface
                     HttpContext.Session.SetString("UserRole", account.Role);
                     HttpContext.Session.SetString("Username", account.Username);
                     HttpContext.Session.SetInt32("AccountID", account.AccountID);
@@ -55,7 +62,6 @@ namespace AdminWebPage.Controllers
                     {
                         "Admin" => RedirectToAction("Index", "Dashboard"),
                         "Teacher" => RedirectToAction("Index", "Dashboard"),
-                        "Student" => RedirectToAction("Index", "Dashboard"),
                         _ => RedirectToAction("Login", "Auth")
                     };
                 }
@@ -76,7 +82,7 @@ namespace AdminWebPage.Controllers
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(string email)
         {
-            var account = await _context.Account.FirstOrDefaultAsync(a => a.Email == email);
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == email);
 
             if (account == null)
             {
@@ -163,7 +169,7 @@ namespace AdminWebPage.Controllers
                 return View();
             }
 
-            var account = await _context.Account.FirstOrDefaultAsync(a => a.Email == email);
+            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == email);
 
             if (account == null)
             {
@@ -175,7 +181,7 @@ namespace AdminWebPage.Controllers
             account.Password = newPassword;
 
             // ✅ FORCE EF TO TRACK THE CHANGE
-            _context.Account.Update(account);
+            _context.Accounts.Update(account);
             await _context.SaveChangesAsync();
 
             // ✅ CLEAR SESSION

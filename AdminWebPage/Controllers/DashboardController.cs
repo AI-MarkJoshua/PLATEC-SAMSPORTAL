@@ -28,33 +28,33 @@ namespace AdminWebPage.Controllers
             // 🔢 COUNTS - Different based on role
             if (userRole == "Admin")
             {
-                ViewBag.TotalStudents = await _context.Account
+                ViewBag.TotalStudents = await _context.Accounts
                     .CountAsync(a => a.Role == "Student");
 
-                ViewBag.TotalTeachers = await _context.Account
+                ViewBag.TotalTeachers = await _context.Accounts
                     .CountAsync(a => a.Role == "Teacher");
 
-                ViewBag.TotalAdmins = await _context.Account
+                ViewBag.TotalAdmins = await _context.Accounts
                     .CountAsync(a => a.Role == "Admin");
             }
             else if (userRole == "Teacher")
             {
-                ViewBag.TotalStudents = await _context.Account
+                ViewBag.TotalStudents = await _context.Accounts
                     .CountAsync(a => a.Role == "Student" && a.TeacherID == accountId);
                     
                 ViewBag.TotalTeachers = 1; // Only themselves
-                ViewBag.TotalAdmins = await _context.Account
+                ViewBag.TotalAdmins = await _context.Accounts
                     .CountAsync(a => a.Role == "Admin");
             }
             else // Student
             {
-                ViewBag.TotalStudents = await _context.Account
+                ViewBag.TotalStudents = await _context.Accounts
                     .CountAsync(a => a.Role == "Student");
 
-                ViewBag.TotalTeachers = await _context.Account
+                ViewBag.TotalTeachers = await _context.Accounts
                     .CountAsync(a => a.Role == "Teacher");
 
-                ViewBag.TotalAdmins = await _context.Account
+                ViewBag.TotalAdmins = await _context.Accounts
                     .CountAsync(a => a.Role == "Admin");
             }
 

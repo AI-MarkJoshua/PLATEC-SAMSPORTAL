@@ -1,4 +1,7 @@
 ﻿@model AdminWebPage.Shared.Models.Account
+@inject AdminWebPage.Shared.Data.AdminWebPageContext _context
+@using System.Linq
+@using Microsoft.EntityFrameworkCore
 
 @{
     ViewData["Title"] = "Edit Account";
@@ -83,7 +86,7 @@
 
                 <div class="col-md-6">
                     <label asp-for="Role" class="form-label">Role</label>
-                    <select asp-for="Role" class="form-select rounded-20">
+                    <select asp-for="Role" class="form-select rounded-20" id="roleSelect">
                         <option value="">-- Select Role --</option>
                         
                         @if (userRole == "Admin" || userRole == "Student")
@@ -99,25 +102,106 @@
                         <option value="Student">Student</option>
                     </select>
                     <span asp-validation-for="Role" class="text-danger"></span>
-                    
-                    @if (userRole == "Teacher")
-                    {
+                </div>
+            </div>
+            
+            <!-- Teacher Assignment Section (only for Admin editing Student) -->
+            <div id="teacherAssignmentSection" class="col-md-12" style="display: none;">
+                <h5 class="mb-3 text-secondary">Assign to Teacher</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Select Teacher (Optional)</label>
+                        <select id="teacherSelect" class="form-select rounded-20" name="selectedTeacherId">
+                            <option value="">-- No Teacher (Unassigned) --</option>
+                            @{
+                                var teachers = await _context.Accounts
+                                    .Where(a => a.Role == "Teacher")
+                                    .OrderBy(a => a.LName)
+                                    .ThenBy(a => a.FName)
+                                    .ToListAsync();
+                                
+                                foreach (var teacher in teachers)
+                                {
+                                    var isSelected = Model.TeacherID == teacher.AccountID;
+                                    <option value="@teacher.AccountID" selected="@isSelected">@teacher.FName @teacher.LName (@teacher.Username)</option>
+                                }
+                            }
+                        </select>
                         <small class="text-muted d-block mt-1">
-                            Teachers can only edit Student accounts.
+                            Assign this student to a teacher for supervision. Leave unassigned if not needed.
                         </small>
-                    }
-                    else if (userRole == "Student")
-                    {
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section Assignment Section (for Admin editing Teacher or Student) -->
+            <div id="sectionAssignmentSection" class="col-md-12" style="display: none;">
+                <h5 class="mb-3 text-secondary">Assign to Section</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Select Section</label>
+                        <select id="sectionSelect" class="form-select rounded-20" name="selectedSectionId">
+                            <option value="">-- No Section (Unassigned) --</option>
+                            @{
+                                var sections = await _context.Sections
+                                    .OrderBy(s => s.SectionName)
+                                    .ToListAsync();
+                                
+                                foreach (var sectionItem in sections)
+                                {
+                                    var isSelected = Model.SectionID == sectionItem.SectionID;
+                                    <option value="@sectionItem.SectionID" selected="@isSelected" data-teacher-sections="@string.Join(",", await _context.TeacherSections.Where(ts => ts.SectionID == sectionItem.SectionID).Select(ts => ts.TeacherID.ToString()).ToListAsync())">@sectionItem.SectionName</option>
+                                }
+                            }
+                        </select>
                         <small class="text-muted d-block mt-1">
-                            Students can edit all account types.
+                            Assign to a section for organization. Sections are filtered based on selected teacher.
                         </small>
-                    }
-                    else if (userRole == "Admin")
-                    {
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Teacher Section Assignment (only for Admin editing Teacher) -->
+            <div id="teacherSectionAssignmentSection" class="col-md-12" style="display: none;">
+                <h5 class="mb-3 text-secondary">Assign Teacher to Sections</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-12">
+                        <label class="form-label">Select Sections for this Teacher</label>
+                        <div class="border rounded-20 p-3" style="max-height: 200px; overflow-y: auto;">
+                            @{
+                                var allSections = await _context.Sections
+                                    .OrderBy(s => s.SectionName)
+                                    .ToListAsync();
+                                
+                                // Get current teacher's assigned sections
+                                var currentTeacherSections = new HashSet<int>();
+                                if (Model.Role == "Teacher")
+                                {
+                                    var assignedSectionIds = await _context.TeacherSections
+                                        .Where(ts => ts.TeacherID == Model.AccountID)
+                                        .Select(ts => ts.SectionID)
+                                        .ToListAsync();
+                                    currentTeacherSections = new HashSet<int>(assignedSectionIds);
+                                }
+                                
+                                foreach (var sectionItem in allSections)
+                                {
+                                    var isChecked = currentTeacherSections.Contains(sectionItem.SectionID);
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="selectedSectionIds" value="@sectionItem.SectionID" 
+                                               id="section_@sectionItem.SectionID" checked="@isChecked">
+                                        <label class="form-check-label" for="section_@sectionItem.SectionID">
+                                            @sectionItem.SectionName
+                                        </label>
+                                    </div>
+                                }
+                            }
+                        </div>
                         <small class="text-muted d-block mt-1">
-                            Admins can edit all account types.
+                            Select all sections this teacher will manage. Teachers can only see students in their assigned sections.
                         </small>
-                    }
+                    </div>
                 </div>
             </div>
 
@@ -146,6 +230,96 @@
     }
 
     <script>
+        // Show/hide assignment sections based on role and selected role
+        document.getElementById('roleSelect').addEventListener('change', function() {
+            const selectedRole = this.value;
+            const teacherSection = document.getElementById('teacherAssignmentSection');
+            const sectionSection = document.getElementById('sectionAssignmentSection');
+            const teacherSectionSection = document.getElementById('teacherSectionAssignmentSection');
+            const userRole = '@userRole';
+            
+            // Hide all sections first
+            teacherSection.style.display = 'none';
+            sectionSection.style.display = 'none';
+            teacherSectionSection.style.display = 'none';
+            
+            if (userRole === 'Admin') {
+                if (selectedRole === 'Student') {
+                    // Admin editing Student: show teacher assignment and section assignment
+                    teacherSection.style.display = 'block';
+                    sectionSection.style.display = 'block';
+                } else if (selectedRole === 'Teacher') {
+                    // Admin editing Teacher: show teacher section assignment
+                    teacherSectionSection.style.display = 'block';
+                }
+            } else if (userRole === 'Teacher') {
+                // Teacher editing Student: show section assignment (auto-assigned to teacher's sections)
+                if (selectedRole === 'Student') {
+                    sectionSection.style.display = 'block';
+                    // Load teacher's sections
+                    loadTeacherSections();
+                }
+            } else if (userRole === 'Student') {
+                // Student editing Student: show section assignment (optional)
+                if (selectedRole === 'Student') {
+                    sectionSection.style.display = 'block';
+                }
+            }
+        });
+
+        // Filter sections based on selected teacher
+        document.getElementById('teacherSelect')?.addEventListener('change', function() {
+            const selectedTeacherId = this.value;
+            const sectionSelect = document.getElementById('sectionSelect');
+            
+            if (selectedTeacherId) {
+                // Filter sections to show only those assigned to the selected teacher
+                const options = sectionSelect.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value !== '') {
+                        const teacherSections = option.getAttribute('data-teacher-sections');
+                        if (teacherSections) {
+                            const teacherIds = teacherSections.split(',');
+                            option.style.display = teacherIds.includes(selectedTeacherId) ? 'block' : 'none';
+                        } else {
+                            option.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Reset section selection if current selection is not available
+                const currentSelection = sectionSelect.value;
+                if (currentSelection && sectionSelect.querySelector(`option[value="${currentSelection}"]`).style.display === 'none') {
+                    sectionSelect.value = '';
+                }
+            } else {
+                // Show all sections when no teacher is selected
+                const options = sectionSelect.querySelectorAll('option');
+                options.forEach(option => option.style.display = 'block');
+            }
+        });
+
+        // Load teacher's sections for section dropdown
+        function loadTeacherSections() {
+            const sectionSelect = document.getElementById('sectionSelect');
+            // This would be implemented to load only the teacher's assigned sections
+            // For now, we'll show all sections
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('roleSelect');
+            if (roleSelect) {
+                roleSelect.dispatchEvent(new Event('change'));
+            }
+            
+            // Trigger teacher change event to filter sections
+            const teacherSelect = document.getElementById('teacherSelect');
+            if (teacherSelect) {
+                teacherSelect.dispatchEvent(new Event('change'));
+            }
+        });
+
         function generateAccount() {
             fetch('/Accounts/GenerateStudentAccount')
                 .then(res => res.json())

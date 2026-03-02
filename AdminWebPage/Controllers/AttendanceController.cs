@@ -30,7 +30,7 @@ namespace AdminWebPage.Controllers
 
             ViewBag.SelectedDate = selectedDate;
 
-            var studentsQuery = _context.Account.Where(a => a.Role == "Student");
+            var studentsQuery = _context.Accounts.Where(a => a.Role == "Student");
             
             // If user is Teacher, only show students assigned to them
             if (userRole == "Teacher")
@@ -96,7 +96,7 @@ namespace AdminWebPage.Controllers
             // If user is Teacher, verify the student is assigned to them
             if (userRole == "Teacher")
             {
-                var student = await _context.Account.FindAsync(studentId);
+                var student = await _context.Accounts.FindAsync(studentId);
                 if (student?.TeacherID != accountId)
                 {
                     TempData["Error"] = "Access Denied: You can only mark attendance for students assigned to you.";
@@ -146,7 +146,7 @@ namespace AdminWebPage.Controllers
                 // If user is Teacher, verify the student is assigned to them
                 if (userRole == "Teacher")
                 {
-                    var student = await _context.Account.FindAsync(item.StudentId);
+                    var student = await _context.Accounts.FindAsync(item.StudentId);
                     if (student?.TeacherID != accountId)
                     {
                         continue; // Skip students not assigned to this teacher
@@ -195,7 +195,7 @@ namespace AdminWebPage.Controllers
             if (startDate == null || endDate == null)
                 return View(reportData);
 
-            var studentsQuery = _context.Account.Where(a => a.Role == "Student");
+            var studentsQuery = _context.Accounts.Where(a => a.Role == "Student");
             
             // If user is Teacher, only show students assigned to them
             if (userRole == "Teacher")
