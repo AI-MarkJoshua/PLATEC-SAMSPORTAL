@@ -22,7 +22,7 @@ namespace AdminWebPage.Controllers
 
         // GET: Accounts
         // GET: Accounts
-        public async Task<IActionResult> Index(string search, string role, int page = 1)
+        public async Task<IActionResult> Index(string search, string role, int? sectionId, int page = 1)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             var accountId = HttpContext.Session.GetInt32("AccountID");
@@ -42,6 +42,20 @@ namespace AdminWebPage.Controllers
             {
                 // Teachers can only see students assigned to them
                 accounts = accounts.Where(a => a.TeacherID == accountId);
+                
+                // Get teacher's assigned sections for dropdown
+                var teacherSections = await _context.TeacherSections
+                    .Where(ts => ts.TeacherID == accountId)
+                    .Include(ts => ts.Section)
+                    .ToListAsync();
+                
+                ViewBag.TeacherSections = teacherSections;
+                
+                // If a section is selected, filter students by that section
+                if (sectionId.HasValue)
+                {
+                    accounts = accounts.Where(a => a.SectionID == sectionId.Value);
+                }
             }
             // Admin and Student can see all accounts
 
@@ -77,6 +91,7 @@ namespace AdminWebPage.Controllers
             ViewBag.TotalPages = totalPages;
             ViewBag.Search = search;
             ViewBag.Role = role;
+            ViewBag.SectionId = sectionId;
 
             return View(pagedAccounts);
         }
@@ -249,34 +264,50 @@ namespace AdminWebPage.Controllers
             var userRole = HttpContext.Session.GetString("UserRole");
             var accountId = HttpContext.Session.GetInt32("AccountID");
             
+            // Retrieve the existing account to avoid tracking conflicts
+            var existingAccount = await _context.Accounts.FindAsync(id);
+            if (existingAccount == null)
+            {
+                return NotFound();
+            }
+            
             // Check permissions
             if (userRole == "Teacher")
             {
                 // Teachers can only edit students assigned to them
-                var targetAccount = await _context.Accounts.FindAsync(id);
-                if (targetAccount == null || targetAccount.TeacherID != accountId)
+                if (existingAccount.TeacherID != accountId)
                 {
                     TempData["Error"] = "Access Denied: You can only edit students assigned to you.";
                     return RedirectToAction(nameof(Index));
                 }
-                // Teachers cannot change the role
-                account.Role = targetAccount.Role;
-                account.TeacherID = accountId;
-                // Teachers can assign students to sections
-                account.SectionID = selectedSectionId;
+                // Teachers cannot change to role
+                existingAccount.FName = account.FName;
+                existingAccount.MName = account.MName;
+                existingAccount.LName = account.LName;
+                existingAccount.Username = account.Username;
+                existingAccount.Email = account.Email;
+                existingAccount.Password = account.Password;
+                existingAccount.Role = existingAccount.Role; // Keep original role
+                existingAccount.TeacherID = accountId;
+                existingAccount.SectionID = selectedSectionId;
             }
             else if (userRole == "Student")
             {
                 // Students have full access to edit any account
-                if (account.Role == "Student")
+                existingAccount.FName = account.FName;
+                existingAccount.MName = account.MName;
+                existingAccount.LName = account.LName;
+                existingAccount.Username = account.Username;
+                existingAccount.Email = account.Email;
+                existingAccount.Password = account.Password;
+                existingAccount.Role = account.Role;
+                existingAccount.TeacherID = (account.Role == "Student") ? selectedTeacherId : null;
+                existingAccount.SectionID = (account.Role == "Student") ? selectedSectionId : null;
+                
+                if (account.Role == "Teacher")
                 {
-                    account.TeacherID = selectedTeacherId;
-                    account.SectionID = selectedSectionId;
-                }
-                else if (account.Role == "Teacher")
-                {
-                    account.TeacherID = null;
-                    account.SectionID = null;
+                    existingAccount.TeacherID = null;
+                    existingAccount.SectionID = null;
                     
                     // Update teacher-section assignments
                     if (selectedSectionIds != null && selectedSectionIds.Any())
@@ -310,17 +341,25 @@ namespace AdminWebPage.Controllers
             else if (userRole == "Admin")
             {
                 // Admin can edit any account
+                existingAccount.FName = account.FName;
+                existingAccount.MName = account.MName;
+                existingAccount.LName = account.LName;
+                existingAccount.Username = account.Username;
+                existingAccount.Email = account.Email;
+                existingAccount.Password = account.Password;
+                existingAccount.Role = account.Role;
+                
                 if (account.Role == "Student")
                 {
                     // Admin editing student can assign to teacher and section
-                    account.TeacherID = selectedTeacherId;
-                    account.SectionID = selectedSectionId;
+                    existingAccount.TeacherID = selectedTeacherId;
+                    existingAccount.SectionID = selectedSectionId;
                 }
                 else if (account.Role == "Teacher")
                 {
                     // Admin editing teacher - handle section assignments
-                    account.TeacherID = null;
-                    account.SectionID = null;
+                    existingAccount.TeacherID = null;
+                    existingAccount.SectionID = null;
                     
                     // Update teacher-section assignments
                     if (selectedSectionIds != null && selectedSectionIds.Any())
@@ -352,21 +391,15 @@ namespace AdminWebPage.Controllers
                 }
             }
 
-            if (id != account.AccountID)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(account);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AccountExists(account.AccountID))
+                    if (!AccountExists(existingAccount.AccountID))
                     {
                         return NotFound();
                     }
@@ -377,7 +410,7 @@ namespace AdminWebPage.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(account);
+            return View(existingAccount);
         }
 
         // GET: Accounts/Delete/5

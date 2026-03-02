@@ -53,7 +53,7 @@
    @(ViewContext.RouteData.Values["controller"]?.ToString() == "Accounts" ? "active" : "")"
                        asp-controller="Accounts" asp-action="Index">
                         <i class="bi bi-people fs-4"></i>
-                        Accounts
+                        @(userRole == "Teacher" ? "Enroll Student" : "Accounts")
                     </a>
                 </li>
 
