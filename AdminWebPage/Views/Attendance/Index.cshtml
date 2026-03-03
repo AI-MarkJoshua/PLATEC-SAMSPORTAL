@@ -41,33 +41,35 @@
     </div>
 </form>
 
-@if (ViewBag.AttendanceDates != null && ViewBag.AttendanceDates.Count > 0)
+@if (ViewBag.AttendanceByDateAndSection != null)
 {
   <div class="bg-white p-4 rounded shadow-sm mt-4">
     <h5 class="mb-3">Attendance History</h5>
 
     <div class="d-flex flex-wrap gap-3">
-        @foreach (DateTime date in ViewBag.AttendanceDates)
+        @{
+            var attendanceByDateAndSection = ViewBag.AttendanceByDateAndSection;
+        }
+        @foreach (var entry in attendanceByDateAndSection)
         {
-            var attendanceByDate = ViewBag.AttendanceByDate as Dictionary<DateTime, Dictionary<int, string>>;
+            var key = entry.Key;
+            var date = key.Date;
+            var sectionName = key.SectionName;
+            var sectionId = key.SectionId;
+            var attendanceData = entry.Value as Dictionary<int, string>;
 
-            int present = 0;
-            int absent = 0;
-            int late = 0;
-
-            if (attendanceByDate != null && attendanceByDate.ContainsKey(date))
-            {
-                present = attendanceByDate[date].Count(x => x.Value == "Present");
-                absent = attendanceByDate[date].Count(x => x.Value == "Absent");
-                late = attendanceByDate[date].Count(x => x.Value == "Late");
-            }
+            int present = attendanceData.Count(x => x.Value == "Present");
+            int absent = attendanceData.Count(x => x.Value == "Absent");
+            int late = attendanceData.Count(x => x.Value == "Late");
 
             <!-- ATTENDANCE CARD -->
             <div class="attendance-card card shadow-sm"
                  data-bs-toggle="modal"
-                 data-bs-target="#attendanceModal-@date.ToString("yyyyMMdd")">
+                 data-bs-target="#attendanceModal-@date.ToString("yyyyMMdd")-@sectionId">
 
-                <div class="card-header"></div>
+                <div class="card-header">
+                    <strong>@sectionName</strong>
+                </div>
 
                 <div class="card-body">
                     <div class="attendance-date">
@@ -86,14 +88,14 @@
                 </div>
             </div>
  
-            <!-- MODAL (UNCHANGED) -->
-            <div class="modal fade" id="attendanceModal-@date.ToString("yyyyMMdd")" tabindex="-1"
-                 aria-labelledby="attendanceModalLabel-@date.ToString("yyyyMMdd")" aria-hidden="true">
+            <!-- MODAL -->
+            <div class="modal fade" id="attendanceModal-@date.ToString("yyyyMMdd")-@sectionId" tabindex="-1"
+                 aria-labelledby="attendanceModalLabel-@date.ToString("yyyyMMdd")-@sectionId" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-scrollable modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="attendanceModalLabel-@date.ToString("yyyyMMdd")">
-                                Attendance - @date.ToString("yyyy-MM-dd")
+                            <h5 class="modal-title" id="attendanceModalLabel-@date.ToString("yyyyMMdd")-@sectionId">
+                                @sectionName - @date.ToString("yyyy-MM-dd")
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
@@ -107,18 +109,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var student in Model)
+                                    @foreach (var attendanceEntry in attendanceData)
                                     {
-                                        var attendanceByDateModal = ViewBag.AttendanceByDate as Dictionary<DateTime, Dictionary<int, string>>;
-                                        var status = "";
-
-                                        if (attendanceByDateModal != null && attendanceByDateModal.ContainsKey(date))
-                                        {
-                                            attendanceByDateModal[date].TryGetValue(student.AccountID, out status);
-                                        }
-
+                                        var studentId = attendanceEntry.Key;
+                                        var status = attendanceEntry.Value;
+                                        
+                                        // Find student details
+                                        var student = Model.FirstOrDefault(s => s.AccountID == studentId);
+                                        var studentName = student != null ? $"{student.FName} {student.LName}" : $"Student ID: {studentId}";
+                                        
                                         <tr>
-                                            <td>@student.FName @student.LName</td>
+                                            <td>@studentName</td>
                                             <td class="text-center">
                                                 @if (status == "Present")
                                                 {

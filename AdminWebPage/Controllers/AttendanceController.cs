@@ -81,26 +81,31 @@ namespace AdminWebPage.Controllers
             }
             ViewBag.AttendanceMap = attendanceDict;
 
-            // Get all attendance dates
-            var attendanceDates = await _context.Attendances
+            // Load all attendances grouped by date and section for separate cards
+            var allAttendance = await _context.Attendances
+                .Include(a => a.Student)
+                    .ThenInclude(s => s.Section)
+                .ToListAsync();
+
+            // Group by date and section to create separate cards for each classroom
+            var attendanceByDateAndSection = allAttendance
+                .GroupBy(a => new { 
+                    Date = a.Date.Date, 
+                    SectionName = a.Student?.Section?.SectionName ?? "Unassigned",
+                    SectionId = a.Student?.SectionID ?? 0
+                })
+                .ToDictionary(g => g.Key, g => g.ToDictionary(a => a.StudentId, a => a.Status));
+
+            ViewBag.AttendanceByDateAndSection = attendanceByDateAndSection;
+
+            // Get unique dates for filtering (still needed for some UI elements)
+            var attendanceDates = allAttendance
                 .Select(a => a.Date.Date)
                 .Distinct()
                 .OrderByDescending(d => d)
-                .ToListAsync();
+                .ToList();
 
             ViewBag.AttendanceDates = attendanceDates;
-
-            // Load all attendances grouped by date for modal display
-            var allAttendance = await _context.Attendances
-                .Include(a => a.Student)
-                .ToListAsync();
-
-            // Group by date
-            var attendanceByDate = allAttendance
-                .GroupBy(a => a.Date.Date)
-                .ToDictionary(g => g.Key, g => g.ToDictionary(a => a.StudentId, a => a.Status));
-
-            ViewBag.AttendanceByDate = attendanceByDate;
 
             return View(students);
         }
