@@ -134,14 +134,14 @@
                 </div>
             </div>
             
-            <!-- Section Assignment Section (for Admin editing Teacher or Student) -->
+            <!-- Subject Assignment Section (for Admin editing Teacher or Student) -->
             <div id="sectionAssignmentSection" class="col-md-12" style="display: none;">
-                <h5 class="mb-3 text-secondary">Assign to Section</h5>
+                <h5 class="mb-3 text-secondary">Assign to Subject</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-12">
-                        <label class="form-label">Select Section</label>
+                        <label class="form-label">Select Subject</label>
                         <select id="sectionSelect" class="form-select rounded-20" name="selectedSectionId">
-                            <option value="">-- No Section (Unassigned) --</option>
+                            <option value="">-- No Subject (Unassigned) --</option>
                             @{
                                 List<Section> sections;
                                 if (userRole == "Teacher")
@@ -171,7 +171,7 @@
                             }
                         </select>
                         <small class="text-muted d-block mt-1">
-                            Assign to a section for organization. Sections are filtered based on selected teacher.
+                            Assign to a subject for organization. Subjects are filtered based on selected teacher.
                         </small>
                     </div>
                 </div>
@@ -179,10 +179,10 @@
             
             <!-- Teacher Section Assignment (only for Admin editing Teacher) -->
             <div id="teacherSectionAssignmentSection" class="col-md-12" style="display: none;">
-                <h5 class="mb-3 text-secondary">Assign Teacher to Sections</h5>
+                <h5 class="mb-3 text-secondary">Assign Teacher to Subjects</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-12">
-                        <label class="form-label">Select Sections for this Teacher</label>
+                        <label class="form-label">Select Subjects for this Teacher</label>
                         <div class="border rounded-20 p-3" style="max-height: 200px; overflow-y: auto;">
                             @{
                                 var allSections = await _context.Sections
@@ -215,7 +215,7 @@
                             }
                         </div>
                         <small class="text-muted d-block mt-1">
-                            Select all sections this teacher will manage. Teachers can only see students in their assigned sections.
+                            Select all subjects this teacher will manage. Teachers can only see students in their assigned subjects.
                         </small>
                     </div>
                 </div>

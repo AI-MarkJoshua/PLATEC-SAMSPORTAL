@@ -1,10 +1,10 @@
 @model AdminWebPage.Shared.Models.Section
 
 @{
-    ViewData["Title"] = "Edit Classroom";
+    ViewData["Title"] = "Edit Subject";
 }
 
-<h2 class="mb-4">Edit Classroom</h2>
+<h2 class="mb-4">Edit Subject</h2>
 
 <div class="row justify-content-center">
     <div class="col-md-6">
@@ -14,12 +14,12 @@
             <input type="hidden" asp-for="SectionID" />
 
             <div class="mb-4">
-                <label asp-for="SectionName" class="form-label">Classroom Name</label>
+                <label asp-for="SectionName" class="form-label">Subject Name</label>
                 <input asp-for="SectionName" class="form-control rounded-20" 
-                       placeholder="Enter classroom name (e.g., Apple, Banana, etc.)" />
+                       placeholder="Enter subject name (e.g., English, Math, Science, Filipino)" />
                 <span asp-validation-for="SectionName" class="text-danger"></span>
                 <small class="text-muted d-block mt-1">
-                    Update the name for this classroom
+                    Update the name for this subject
                 </small>
             </div>
 
@@ -29,7 +29,7 @@
                 </a>
                 <button type="submit" class="btn text-white rounded-20" 
                         style="background-color:#20274a;">
-                    <i class="bi bi-pencil"></i> Update Classroom
+                    <i class="bi bi-pencil"></i> Update Subject
                 </button>
             </div>
         </form>

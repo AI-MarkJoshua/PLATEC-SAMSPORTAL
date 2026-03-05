@@ -19,10 +19,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -40,10 +40,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -57,10 +57,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -79,7 +79,7 @@ namespace AdminWebPage.Controllers
                 section.CreatedAt = DateTime.Now;
                 _context.Add(section);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Section created successfully!";
+                TempData["Success"] = "Subject created successfully!";
                 return RedirectToAction(nameof(Index));
             }
             return View(section);
@@ -90,10 +90,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -118,10 +118,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -146,7 +146,7 @@ namespace AdminWebPage.Controllers
 
                     _context.Update(section);
                     await _context.SaveChangesAsync();
-                    TempData["Success"] = "Section updated successfully!";
+                    TempData["Success"] = "Subject updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -169,10 +169,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -201,10 +201,10 @@ namespace AdminWebPage.Controllers
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             
-            // Only Admin can access sections management
+            // Only Admin can access subjects management
             if (userRole != "Admin")
             {
-                TempData["Error"] = "Access Denied. Only Admins can manage sections.";
+                TempData["Error"] = "Access Denied. Only Admins can manage subjects.";
                 return RedirectToAction("Index", "Dashboard");
             }
 
@@ -217,13 +217,13 @@ namespace AdminWebPage.Controllers
                 // Check if any teachers are assigned to this section
                 if (section.TeacherSections.Any())
                 {
-                    TempData["Error"] = "Cannot delete section. Teachers are still assigned to this section.";
+                    TempData["Error"] = "Cannot delete subject. Teachers are still assigned to this subject.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 _context.Sections.Remove(section);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Section deleted successfully!";
+                TempData["Success"] = "Subject deleted successfully!";
             }
             
             return RedirectToAction(nameof(Index));

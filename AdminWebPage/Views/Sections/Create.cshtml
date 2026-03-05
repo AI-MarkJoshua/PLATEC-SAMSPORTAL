@@ -1,10 +1,10 @@
 @model AdminWebPage.Shared.Models.Section
 
 @{
-    ViewData["Title"] = "Add Classroom";
+    ViewData["Title"] = "Add Subject";
 }
 
-<h2 class="mb-4">Add New Classroom</h2>
+<h2 class="mb-4">Add New Subject</h2>
 
 <div class="row justify-content-center">
     <div class="col-md-6">
@@ -13,12 +13,12 @@
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="mb-4">
-                <label asp-for="SectionName" class="form-label">Classroom Name</label>
+                <label asp-for="SectionName" class="form-label">Subject Name</label>
                 <input asp-for="SectionName" class="form-control rounded-20" 
-                       placeholder="Enter classroom name (e.g., Apple, Banana, etc.)" />
+                       placeholder="Enter subject name (e.g., English, Math, Science, Filipino)" />
                 <span asp-validation-for="SectionName" class="text-danger"></span>
                 <small class="text-muted d-block mt-1">
-                    Choose a name for this classroom (e.g., Apple, Banana, Grapes, etc.)
+                    Choose a name for this subject (e.g., English, Math, Science, Filipino)
                 </small>
             </div>
 
@@ -28,7 +28,7 @@
                 </a>
                 <button type="submit" class="btn text-white rounded-20" 
                         style="background-color:#20274a;">
-                    <i class="bi bi-plus-circle"></i> Create Classroom
+                    <i class="bi bi-plus-circle"></i> Create Subject
                 </button>
             </div>
         </form>
