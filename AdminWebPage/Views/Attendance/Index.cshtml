@@ -67,116 +67,69 @@
   <div class="bg-white p-4 rounded shadow-sm mt-4">
     <h5 class="mb-3">Attendance History</h5>
 
-    <div class="d-flex flex-wrap gap-3">
-        @{
-            var attendanceByDateAndSection = ViewBag.AttendanceByDateAndSection;
-        }
-        @foreach (var entry in attendanceByDateAndSection)
-        {
-            var key = entry.Key;
-            var date = key.Date;
-            var sectionName = key.SectionName;
-            var sectionId = key.SectionId;
-            var attendanceData = entry.Value as Dictionary<int, string>;
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Teacher</th>
+                    <th>Subject</th>
+                    <th>Total Students</th>
+                    <th class="text-center">Present</th>
+                    <th class="text-center">Absent</th>
+                    <th class="text-center">Late</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var attendanceByDateAndSection = ViewBag.AttendanceByDateAndSection;
+                }
+                @foreach (var entry in attendanceByDateAndSection)
+                {
+                    var key = entry.Key;
+                    var date = key.Date;
+                    var sectionName = key.SectionName;
+                    var sectionId = key.SectionId;
+                    var teacherName = key.TeacherName ?? "Unknown";
+                    var attendanceData = entry.Value as Dictionary<int, string>;
 
-            int present = attendanceData.Count(x => x.Value == "Present");
-            int absent = attendanceData.Count(x => x.Value == "Absent");
-            int late = attendanceData.Count(x => x.Value == "Late");
+                    int present = attendanceData.Count(x => x.Value == "Present");
+                    int absent = attendanceData.Count(x => x.Value == "Absent");
+                    int late = attendanceData.Count(x => x.Value == "Late");
+                    int totalStudents = attendanceData.Count;
 
-            <!-- ATTENDANCE CARD -->
-            <div class="attendance-card card shadow-sm"
-                 data-bs-toggle="modal"
-                 data-bs-target="#attendanceModal-@date.ToString("yyyyMMdd")-@sectionId">
-
-                <div class="card-header">
-                    <strong>@sectionName</strong>
-                </div>
-
-                <div class="card-body">
-                    <div class="attendance-date">
-                        @date.ToString("MMMM dd, yyyy")
-                    </div>
-
-                    <div class="attendance-stats text-muted">
-                        <span>✅ Present: <strong>@present</strong></span>
-                        <span>❌ Absent: <strong>@absent</strong></span>
-                        <span>⏰ Late: <strong>@late</strong></span>
-                    </div>
-
-                    <button class="btn btn-sm btn-outline-primary view-btn">
-                        View
-                    </button>
-                </div>
-            </div>
- 
-            <!-- MODAL -->
-            <div class="modal fade" id="attendanceModal-@date.ToString("yyyyMMdd")-@sectionId" tabindex="-1"
-                 aria-labelledby="attendanceModalLabel-@date.ToString("yyyyMMdd")-@sectionId" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-scrollable modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="attendanceModalLabel-@date.ToString("yyyyMMdd")-@sectionId">
-                                @sectionName - @date.ToString("yyyy-MM-dd")
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-
-                        <div class="modal-body">
-                            <table class="table table-bordered align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Student Name</th>
-                                        <th class="text-center">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var attendanceEntry in attendanceData)
-                                    {
-                                        var studentId = attendanceEntry.Key;
-                                        var status = attendanceEntry.Value;
-                                        
-                                        // Find student details
-                                        var student = Model.FirstOrDefault(s => s.AccountID == studentId);
-                                        var studentName = student != null ? $"{student.FName} {student.LName}" : $"Student ID: {studentId}";
-                                        
-                                        <tr>
-                                            <td>@studentName</td>
-                                            <td class="text-center">
-                                                @if (status == "Present")
-                                                {
-                                                    <span class="badge bg-success">Present</span>
-                                                }
-                                                else if (status == "Absent")
-                                                {
-                                                    <span class="badge bg-danger">Absent</span>
-                                                }
-                                                else if (status == "Late")
-                                                {
-                                                    <span class="badge bg-warning text-dark">Late</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-secondary">N/A</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
+                    <tr>
+                        <td>@date.ToString("MMM dd, yyyy")</td>
+                        <td>@teacherName</td>
+                        <td>@sectionName</td>
+                        <td>@totalStudents</td>
+                        <td class="text-center">
+                            <span class="badge bg-success">@present</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-danger">@absent</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark">@late</span>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#attendanceModal-@date.ToString("yyyyMMdd")-@sectionId">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
-    </div>
+  </div>
 }
 
-@if (ViewBag.SelectedDate != null && Model.Any())
+@if (ViewBag.SelectedDate != null)
 {
     <!-- Modal -->
     <div class="modal fade" id="attendanceModal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
@@ -188,58 +141,71 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="attendanceForm">
-                        @Html.AntiForgeryToken()
+                    @if (Model.Any())
+                    {
+                        <form id="attendanceForm">
+                            @Html.AntiForgeryToken()
 
-                        <table class="table table-bordered align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Student Name</th>
-                                    <th class="text-center">Attendance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var student in Model)
-                                {
-                                    var status = attendanceMap.ContainsKey(student.AccountID)
-                                    ? attendanceMap[student.AccountID]
-                                    : "";
-
+                            <table class="table table-bordered align-middle">
+                                <thead class="table-light">
                                     <tr>
-                                        <td>@student.FName @student.LName</td>
-                                        <td class="text-center">
-                                            <div class="d-inline-flex gap-2">
-                                                <button type="button"
-                                                        class="btn attendance-btn @(status == "Present" ? "btn-success active" : "btn-outline-success")"
-                                                        data-student="@student.AccountID"
-                                                        data-status="Present">
-                                                    Present
-                                                </button>
-
-                                                <button type="button"
-                                                        class="btn attendance-btn @(status == "Absent" ? "btn-danger active" : "btn-outline-danger")"
-                                                        data-student="@student.AccountID"
-                                                        data-status="Absent">
-                                                    Absent
-                                                </button>
-
-                                                <button type="button"
-                                                        class="btn attendance-btn @(status == "Late" ? "btn-warning active" : "btn-outline-warning")"
-                                                        data-student="@student.AccountID"
-                                                        data-status="Late">
-                                                    Late
-                                                </button>
-                                            </div>
-                                        </td>
+                                        <th>Student Name</th>
+                                        <th class="text-center">Attendance</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </form>
+                                </thead>
+                                <tbody>
+                                    @foreach (var student in Model)
+                                    {
+                                        var status = attendanceMap.ContainsKey(student.AccountID)
+                                        ? attendanceMap[student.AccountID]
+                                        : "";
+
+                                        <tr>
+                                            <td>@student.FName @student.LName</td>
+                                            <td class="text-center">
+                                                <div class="d-inline-flex gap-2">
+                                                    <button type="button"
+                                                            class="btn attendance-btn @(status == "Present" ? "btn-success active" : "btn-outline-success")"
+                                                            data-student="@student.AccountID"
+                                                            data-status="Present">
+                                                        Present
+                                                    </button>
+
+                                                    <button type="button"
+                                                            class="btn attendance-btn @(status == "Absent" ? "btn-danger active" : "btn-outline-danger")"
+                                                            data-student="@student.AccountID"
+                                                            data-status="Absent">
+                                                        Absent
+                                                    </button>
+
+                                                    <button type="button"
+                                                            class="btn attendance-btn @(status == "Late" ? "btn-warning active" : "btn-outline-warning")"
+                                                            data-student="@student.AccountID"
+                                                            data-status="Late">
+                                                        Late
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <p>No students found for the selected criteria.</p>
+                            <p>Please try selecting a different teacher, subject, or date.</p>
+                        </div>
+                    }
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="saveAttendanceBtn">Save Attendance</button>
+                    @if (Model.Any())
+                    {
+                        <button type="button" class="btn btn-success" id="saveAttendanceBtn">Save Attendance</button>
+                    }
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -370,8 +336,8 @@
             teacherSelect.dispatchEvent(new Event('change'));
         }
         
-    @* Only trigger if we have students AND we didn't just save *@
-    @if (ViewBag.SelectedDate != null && Model.Any() && !justSaved)
+    @* Only trigger if we have a date selected AND we didn't just save *@
+    @if (ViewBag.SelectedDate != null && !justSaved)
     {
         <text>
                     var attendanceModal = new bootstrap.Modal(document.getElementById('attendanceModal'));

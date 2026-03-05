@@ -119,6 +119,8 @@ namespace AdminWebPage.Controllers
             var allAttendance = await _context.Attendances
                 .Include(a => a.Student)
                     .ThenInclude(s => s.Section)
+                    .ThenInclude(sec => sec.TeacherSections)
+                    .ThenInclude(ts => ts.Teacher)
                 .ToListAsync();
 
             // Group by date and section to create separate cards for each classroom
@@ -126,7 +128,8 @@ namespace AdminWebPage.Controllers
                 .GroupBy(a => new { 
                     Date = a.Date.Date, 
                     SectionName = a.Student?.Section?.SectionName ?? "Unassigned",
-                    SectionId = a.Student?.SectionID ?? 0
+                    SectionId = a.Student?.SectionID ?? 0,
+                    TeacherName = a.Student?.Section?.TeacherSections?.FirstOrDefault()?.Teacher?.FName + " " + a.Student?.Section?.TeacherSections?.FirstOrDefault()?.Teacher?.LName ?? "Unknown"
                 })
                 .ToDictionary(g => g.Key, g => g.ToDictionary(a => a.StudentId, a => a.Status));
 
