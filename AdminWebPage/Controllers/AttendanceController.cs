@@ -63,20 +63,19 @@ namespace AdminWebPage.Controllers
                     .ToListAsync();
                 
                 ViewBag.Teachers = teachers;
+
+                // ALWAYS load all teacher sections to allow client-side JavaScript to filter them
+                var allTeacherSections = await _context.TeacherSections
+                    .Include(ts => ts.Section)
+                    .ToListAsync();
                 
-                // Get sections based on selected teacher or all sections if no teacher selected
+                ViewBag.TeacherSections = allTeacherSections;
+                
+                // Filter students based on selected teacher or all sections if no teacher selected
                 if (selectedTeacherId.HasValue)
                 {
-                    // Get sections only for the selected teacher
-                    var teacherSections = await _context.TeacherSections
-                        .Where(ts => ts.TeacherID == selectedTeacherId.Value)
-                        .Include(ts => ts.Section)
-                        .ToListAsync();
-                    
-                    ViewBag.TeacherSections = teacherSections;
-                    
                     // Filter students by the selected teacher's sections
-                    var teacherSectionIds = teacherSections.Select(ts => ts.SectionID).ToList();
+                    var teacherSectionIds = allTeacherSections.Where(ts => ts.TeacherID == selectedTeacherId.Value).Select(ts => ts.SectionID).ToList();
                     studentsQuery = studentsQuery.Where(a => teacherSectionIds.Contains(a.SectionID.Value));
                     
                     // If a section is also selected, further filter students by that section
@@ -87,13 +86,6 @@ namespace AdminWebPage.Controllers
                 }
                 else
                 {
-                    // No teacher selected, get all sections with their teacher relationships
-                    var allTeacherSections = await _context.TeacherSections
-                        .Include(ts => ts.Section)
-                        .ToListAsync();
-                    
-                    ViewBag.TeacherSections = allTeacherSections.Select(ts => new { SectionID = ts.SectionID, Section = ts.Section, TeacherID = ts.TeacherID }).ToList();
-                    
                     // If a section is selected, filter students by that section
                     if (selectedSectionId.HasValue)
                     {

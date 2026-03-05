@@ -311,9 +311,9 @@
                     modalInstance.hide();
                 }
                 
-                // Refresh the page to show updated attendance history
+                // Refresh the page to show updated attendance history and clear filters
                 setTimeout(() => {
-                    window.location.reload();
+                    window.location.href = '/Attendance/Index';
                 }, 500);
             } else {
                 alert('Failed to save attendance.');
