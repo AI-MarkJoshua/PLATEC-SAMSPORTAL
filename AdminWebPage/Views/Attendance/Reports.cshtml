@@ -4,17 +4,73 @@
 
 <!-- Container for Dates and Generate Button -->
 <div class="p-3 mb-3" style="background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-    <form method="get" class="row g-3 align-items-end">
-        <div class="col-md-4">
+    <form method="get" class="row g-3 align-items-end" id="reportFilterForm">
+        
+        @{
+            var userRole = Context.Session.GetString("UserRole");
+        }
+
+        <div class="@(userRole == "Admin" ? "col-md-2" : "col-md-3")">
+            <label class="form-label">Student Name</label>
+            <input type="text" name="searchStudentName" class="form-control" value="@ViewBag.SearchStudentName" placeholder="Search name..." list="studentNameOptions" autocomplete="off" />
+            
+            <datalist id="studentNameOptions">
+                @if (ViewBag.AllStudentNames != null)
+                {
+                    foreach (var name in ViewBag.AllStudentNames)
+                    {
+                        <option value="@name"></option>
+                    }
+                }
+            </datalist>
+        </div>
+
+        @if (userRole == "Admin")
+        {
+            <div class="col-md-2">
+                <label class="form-label">Select Teacher</label>
+                <select name="selectedTeacherId" class="form-select" id="teacherSelect">
+                    <option value="">-- All Teachers --</option>
+                    @if (ViewBag.Teachers != null)
+                    {
+                        @foreach (var teacher in ViewBag.Teachers)
+                        {
+                            var isSelected = ViewBag.SelectedTeacherId?.ToString() == teacher.AccountID.ToString();
+                            <option value="@teacher.AccountID" selected="@isSelected">@teacher.FName @teacher.LName (@teacher.Username)</option>
+                        }
+                    }
+                </select>
+            </div>
+        }
+
+        <div class="@(userRole == "Admin" ? "col-md-2" : "col-md-3")">
+            <label class="form-label">Select Subject</label>
+            <select name="selectedSectionId" class="form-select" id="subjectSelect">
+                <option value="">-- All Subjects --</option>
+                @if (ViewBag.TeacherSections != null)
+                {
+                    @foreach (var sectionItem in ViewBag.TeacherSections)
+                    {
+                        var isSelected = ViewBag.SelectedSectionId?.ToString() == sectionItem.SectionID.ToString();
+                        <option value="@sectionItem.SectionID" selected="@isSelected" data-teacher-id="@sectionItem.TeacherID">@sectionItem.Section.SectionName</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
             <label class="form-label">Start Date</label>
-            <input type="date" name="startDate" class="form-control" required />
+            <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" required />
         </div>
-        <div class="col-md-4">
+        
+        <div class="col-md-2">
             <label class="form-label">End Date</label>
-            <input type="date" name="endDate" class="form-control" required />
+            <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" required />
         </div>
-        <div class="col-md-4">
+        
+        <div class="col-md-2 d-flex flex-column justify-content-end gap-2">
             <button type="submit" class="btn w-100" style="background-color: #20274a; color: white;">View Report</button>
+            <a href="/Attendance/Reports" class="btn btn-outline-secondary w-100">Clear Filters</a>
         </div>
     </form>
 </div>
@@ -32,6 +88,24 @@
         <div class="text-center mb-3">
             <img src="~/image/mkaHeader.png" alt="MKA Header" class="img-fluid" />
         </div>
+
+        <!-- Header Information -->
+        @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
+        {
+            <div class="text-center mb-4">
+                @if (!string.IsNullOrEmpty(ViewBag.SelectedTeacherName))
+                {
+                    <h5 class="mb-1"><strong>@ViewBag.SelectedTeacherName</strong></h5>
+                }
+                
+                @if (!string.IsNullOrEmpty(ViewBag.SelectedSectionName))
+                {
+                    <h5 class="mb-2"><strong>@ViewBag.SelectedSectionName</strong></h5>
+                }
+                
+                <h5><strong>@(((DateTime)ViewBag.StartDate).ToString("MMM dd, yyyy"))</strong> to <strong>@(((DateTime)ViewBag.EndDate).ToString("MMM dd, yyyy"))</strong></h5>
+            </div>
+        }
 
         <!-- Summary Section -->
         <div class="card mb-3">
@@ -99,5 +173,44 @@
             document.body.innerHTML = originalContents;
             location.reload(); // reload page to restore JS functionality
         }
+
+        // Filter subjects based on teacher selection (for admin)
+        document.getElementById('teacherSelect')?.addEventListener('change', function() {
+            const selectedTeacherId = this.value;
+            const subjectSelect = document.getElementById('subjectSelect');
+            
+            // Get all subject options
+            const options = subjectSelect.querySelectorAll('option');
+            
+            options.forEach(option => {
+                if (option.value === '') {
+                    // Keep the "All Subjects" option visible
+                    option.style.display = 'block';
+                } else {
+                    const teacherId = option.getAttribute('data-teacher-id');
+                    if (selectedTeacherId === '') {
+                        // If "All Teachers" is selected, show all subjects
+                        option.style.display = 'block';
+                    } else {
+                        // Only show subjects belonging to selected teacher
+                        option.style.display = teacherId === selectedTeacherId ? 'block' : 'none';
+                    }
+                }
+            });
+            
+            // Reset subject selection if current selection is not visible
+            const currentSelection = subjectSelect.value;
+            if (currentSelection && subjectSelect.querySelector(`option[value="${currentSelection}"]`).style.display === 'none') {
+                subjectSelect.value = '';
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Trigger teacher filter on page load for admin
+            const teacherSelect = document.getElementById('teacherSelect');
+            if (teacherSelect) {
+                teacherSelect.dispatchEvent(new Event('change'));
+            }
+        });
     </script>
 }
