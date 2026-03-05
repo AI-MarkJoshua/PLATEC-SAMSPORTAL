@@ -16,11 +16,11 @@ namespace AdminWebPage.Data
 
             var sections = new List<Section>
             {
-                new Section { SectionName = "Apple" },
-                new Section { SectionName = "Banana" },
-                new Section { SectionName = "Grapes" },
-                new Section { SectionName = "Orange" },
-                new Section { SectionName = "Strawberry" }
+                new Section { SectionName = "Math Subject" },
+                new Section { SectionName = "Filipino Subject" },
+                new Section { SectionName = "English" },
+                new Section { SectionName = "Science" },
+                new Section { SectionName = "History" }
             };
 
             await context.Sections.AddRangeAsync(sections);
