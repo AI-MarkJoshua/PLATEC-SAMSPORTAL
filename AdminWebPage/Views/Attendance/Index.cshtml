@@ -3,27 +3,47 @@
 @{
     var attendanceMap = ViewBag.AttendanceMap as Dictionary<int, string> ?? new();
     var userRole = Context.Session.GetString("UserRole");
+    var justSaved = TempData["JustSavedAttendance"]?.ToString() == "true";
 }
 
 <h2 class="mb-3">Mark Attendance</h2>
 
-<form method="get" class="mb-4 bg-white p-3 rounded shadow-sm">
+<form method="get" class="mb-4 bg-white p-3 rounded shadow-sm" id="attendanceFilterForm">
     <div class="row g-3">
-        <div class="col-md-4">
+        @if (userRole == "Admin")
+        {
+            <div class="col-md-3">
+                <label class="form-label">Select Teacher</label>
+                <select name="selectedTeacherId" class="form-select" id="teacherSelect">
+                    <option value="">-- All Teachers --</option>
+                    @if (ViewBag.Teachers != null)
+                    {
+                        @foreach (var teacher in ViewBag.Teachers)
+                        {
+                            var isSelected = ViewBag.SelectedTeacherId?.ToString() == teacher.AccountID.ToString();
+                            <option value="@teacher.AccountID" selected="@isSelected">@teacher.FName @teacher.LName (@teacher.Username)</option>
+                        }
+                    }
+                </select>
+            </div>
+        }
+        
+        <div class="@(userRole == "Admin" ? "col-md-3" : "col-md-4")">
             <label class="form-label">Select Subject</label>
-            <select name="selectedSectionId" class="form-select">
+            <select name="selectedSectionId" class="form-select" id="subjectSelect">
                 <option value="">-- All Subjects --</option>
                 @if (ViewBag.TeacherSections != null)
                 {
                     @foreach (var sectionItem in ViewBag.TeacherSections)
                     {
                         var isSelected = ViewBag.SelectedSectionId?.ToString() == sectionItem.SectionID.ToString();
-                        <option value="@sectionItem.SectionID" selected="@isSelected">@sectionItem.Section.SectionName</option>
+                        <option value="@sectionItem.SectionID" selected="@isSelected" data-teacher-id="@sectionItem.TeacherID">@sectionItem.Section.SectionName</option>
                     }
                 }
             </select>
         </div>
-        <div class="col-md-4">
+        
+        <div class="@(userRole == "Admin" ? "col-md-3" : "col-md-4")">
             <label class="form-label">Select Attendance Date</label>
             <input type="date"
                    name="selectedDate"
@@ -31,7 +51,8 @@
                    class="form-control"
                    required />
         </div>
-        <div class="col-md-4">
+        
+        <div class="@(userRole == "Admin" ? "col-md-3" : "col-md-4")">
             <label class="form-label">&nbsp;</label>
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-load-students">Load Students</button>
@@ -230,6 +251,37 @@
 <script>
     const attendanceState = {}; // Track selected status
 
+    // Filter subjects based on teacher selection (for admin)
+    document.getElementById('teacherSelect')?.addEventListener('change', function() {
+        const selectedTeacherId = this.value;
+        const subjectSelect = document.getElementById('subjectSelect');
+        
+        // Get all subject options
+        const options = subjectSelect.querySelectorAll('option');
+        
+        options.forEach(option => {
+            if (option.value === '') {
+                // Keep the "All Subjects" option visible
+                option.style.display = 'block';
+            } else {
+                const teacherId = option.getAttribute('data-teacher-id');
+                if (selectedTeacherId === '') {
+                    // If "All Teachers" is selected, show all subjects
+                    option.style.display = 'block';
+                } else {
+                    // Only show subjects belonging to selected teacher
+                    option.style.display = teacherId === selectedTeacherId ? 'block' : 'none';
+                }
+            }
+        });
+        
+        // Reset subject selection if current selection is not visible
+        const currentSelection = subjectSelect.value;
+        if (currentSelection && subjectSelect.querySelector(`option[value="${currentSelection}"]`).style.display === 'none') {
+            subjectSelect.value = '';
+        }
+    });
+
     // Initialize button click
     document.querySelectorAll('.attendance-btn').forEach(btn => {
         btn.addEventListener('click', function () {
@@ -292,6 +344,11 @@
                 if (modalInstance) {
                     modalInstance.hide();
                 }
+                
+                // Refresh the page to show updated attendance history
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             } else {
                 alert('Failed to save attendance.');
                 // Keep modal open
@@ -307,8 +364,14 @@
 
     // Automatically open modal if students are loaded
     window.addEventListener('DOMContentLoaded', () => {
-    @* Only trigger if we have students *@
-    @if (ViewBag.SelectedDate != null && Model.Any())
+        // Trigger teacher filter on page load for admin
+        const teacherSelect = document.getElementById('teacherSelect');
+        if (teacherSelect) {
+            teacherSelect.dispatchEvent(new Event('change'));
+        }
+        
+    @* Only trigger if we have students AND we didn't just save *@
+    @if (ViewBag.SelectedDate != null && Model.Any() && !justSaved)
     {
         <text>
                     var attendanceModal = new bootstrap.Modal(document.getElementById('attendanceModal'));

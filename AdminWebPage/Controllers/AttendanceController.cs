@@ -16,7 +16,7 @@ namespace AdminWebPage.Controllers
             _context = context;
         }
         // GET: Attendance
-        public async Task<IActionResult> Index(DateTime? selectedDate, int? selectedSectionId)
+        public async Task<IActionResult> Index(DateTime? selectedDate, int? selectedSectionId, int? selectedTeacherId)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
             var accountId = HttpContext.Session.GetInt32("AccountID");
@@ -30,6 +30,7 @@ namespace AdminWebPage.Controllers
 
             ViewBag.SelectedDate = selectedDate;
             ViewBag.SelectedSectionId = selectedSectionId;
+            ViewBag.SelectedTeacherId = selectedTeacherId;
 
             var studentsQuery = _context.Accounts.Where(a => a.Role == "Student");
             
@@ -54,17 +55,50 @@ namespace AdminWebPage.Controllers
             }
             else
             {
-                // For Admin and Student, get all sections
-                var allSections = await _context.Sections
-                    .OrderBy(s => s.SectionName)
+                // For Admin and Student, get all teachers for dropdown
+                var teachers = await _context.Accounts
+                    .Where(a => a.Role == "Teacher")
+                    .OrderBy(a => a.LName)
+                    .ThenBy(a => a.FName)
                     .ToListAsync();
                 
-                ViewBag.TeacherSections = allSections.Select(s => new { SectionID = s.SectionID, Section = s }).ToList();
+                ViewBag.Teachers = teachers;
                 
-                // If a section is selected, filter students by that section
-                if (selectedSectionId.HasValue)
+                // Get sections based on selected teacher or all sections if no teacher selected
+                if (selectedTeacherId.HasValue)
                 {
-                    studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                    // Get sections only for the selected teacher
+                    var teacherSections = await _context.TeacherSections
+                        .Where(ts => ts.TeacherID == selectedTeacherId.Value)
+                        .Include(ts => ts.Section)
+                        .ToListAsync();
+                    
+                    ViewBag.TeacherSections = teacherSections;
+                    
+                    // Filter students by the selected teacher's sections
+                    var teacherSectionIds = teacherSections.Select(ts => ts.SectionID).ToList();
+                    studentsQuery = studentsQuery.Where(a => teacherSectionIds.Contains(a.SectionID.Value));
+                    
+                    // If a section is also selected, further filter students by that section
+                    if (selectedSectionId.HasValue)
+                    {
+                        studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                    }
+                }
+                else
+                {
+                    // No teacher selected, get all sections with their teacher relationships
+                    var allTeacherSections = await _context.TeacherSections
+                        .Include(ts => ts.Section)
+                        .ToListAsync();
+                    
+                    ViewBag.TeacherSections = allTeacherSections.Select(ts => new { SectionID = ts.SectionID, Section = ts.Section, TeacherID = ts.TeacherID }).ToList();
+                    
+                    // If a section is selected, filter students by that section
+                    if (selectedSectionId.HasValue)
+                    {
+                        studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                    }
                 }
             }
             
@@ -159,6 +193,10 @@ namespace AdminWebPage.Controllers
             }
 
             await _context.SaveChangesAsync();
+            
+            // Set TempData to indicate attendance was just saved
+            TempData["JustSavedAttendance"] = "true";
+            
             return RedirectToAction("Index", new { selectedDate = date });
         }
 
@@ -210,6 +248,10 @@ namespace AdminWebPage.Controllers
             }
 
             await _context.SaveChangesAsync();
+            
+            // Set TempData to indicate attendance was just saved
+            TempData["JustSavedAttendance"] = "true";
+            
             return Ok();
         }
         public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate)
