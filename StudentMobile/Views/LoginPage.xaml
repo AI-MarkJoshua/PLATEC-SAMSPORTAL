@@ -7,11 +7,87 @@
         <vm:LoginViewModel/>
     </ContentPage.BindingContext>
 
-    <StackLayout Padding="30" VerticalOptions="Center">
-        <Entry Placeholder="Username" Text="{Binding Username}"/>
-        <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True"/>
-        <Button Text="Test Connection" Clicked="OnTestConnectionClicked"/>
-        <Button Text="Login" Clicked="OnLoginClicked"/>
-        <Label Text="{Binding LoginMessage}" TextColor="Red"/>
-    </StackLayout>
+    <Grid>
+        <!-- Background Image -->
+        <Image Source="mkmbackground.jpg" 
+               Aspect="AspectFill" 
+               Opacity="0.3"/>
+        
+        <!-- Content Overlay -->
+        <Grid Padding="20" VerticalOptions="Center" HorizontalOptions="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- MKA Logo -->
+            <Image Grid.Row="0" 
+                   Source="mka.png" 
+                   HeightRequest="400" 
+                   WidthRequest="400"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   Margin="0,0,0,30"/>
+            
+            <!-- Login Frame -->
+            <Frame Grid.Row="1" 
+                   BackgroundColor="White" 
+                   CornerRadius="15" 
+                   Padding="20" 
+                   HasShadow="True"
+                   WidthRequest="400">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Frame Grid.Row="0" 
+                           BackgroundColor="White" 
+                           BorderColor="#E0E0E0" 
+                           CornerRadius="20" 
+                           Padding="15,12" 
+                           HasShadow="False"
+                           Margin="0,0,0,15">
+                        <Entry x:Name="UsernameEntry"
+                               Placeholder="Username" 
+                               Text="{Binding Username}"
+                               FontSize="16"
+                               BackgroundColor="Transparent"/>
+                    </Frame>
+                    
+                    <Frame Grid.Row="1" 
+                           BackgroundColor="White" 
+                           BorderColor="#E0E0E0" 
+                           CornerRadius="20" 
+                           Padding="15,12" 
+                           HasShadow="False">
+                        <Entry x:Name="PasswordEntry"
+                               Placeholder="Password" 
+                               Text="{Binding Password}" 
+                               IsPassword="True"
+                               FontSize="16"
+                               BackgroundColor="Transparent"/>
+                    </Frame>
+                    
+                    <Button Grid.Row="2" 
+                            Text="Forgot Password?" 
+                            BackgroundColor="Transparent"
+                            TextColor="Blue"
+                            HorizontalOptions="End"
+                            Margin="0,5,0,0"
+                            Clicked="OnForgotPasswordClicked"/>
+                    
+                    <Button Grid.Row="2" 
+                            Text="Login" 
+                            BackgroundColor="#181F49"
+                            TextColor="White"
+                            CornerRadius="10"
+                            Margin="0,20,0,0"
+                            Clicked="OnLoginClicked"/>
+                </Grid>
+            </Frame>
+        </Grid>
+    </Grid>
 </ContentPage>
