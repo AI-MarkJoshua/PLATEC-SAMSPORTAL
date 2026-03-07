@@ -89,5 +89,59 @@
                 </Grid>
             </Frame>
         </Grid>
+        
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay" 
+              BackgroundColor="#80000000" 
+              IsVisible="False" 
+              ZIndex="1000">
+            <StackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                <!-- Loading Frame -->
+                <Frame x:Name="LoadingFrame"
+                       BackgroundColor="White"
+                       CornerRadius="15"
+                       Padding="20"
+                       HasShadow="True"
+                       IsVisible="False"
+                       WidthRequest="300">
+                    <StackLayout Spacing="15">
+                        <Image x:Name="LoadingIcon"
+                               Source="loading_icon.png"
+                               WidthRequest="40"
+                               HeightRequest="40"
+                               HorizontalOptions="Center"/>
+                        <Label x:Name="LoadingMessage" 
+                               Text="Logging in..." 
+                               TextColor="Black" 
+                               FontSize="16"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </StackLayout>
+                </Frame>
+                
+                <!-- Message Frame for Success/Error -->
+                <Frame x:Name="MessageFrame"
+                       BackgroundColor="White"
+                       CornerRadius="15"
+                       Padding="20"
+                       HasShadow="True"
+                       IsVisible="False"
+                       WidthRequest="300">
+                    <StackLayout Spacing="15">
+                        <Image x:Name="MessageIcon"
+                               Source="message_icon.png"
+                               WidthRequest="40"
+                               HeightRequest="40"
+                               HorizontalOptions="Center"/>
+                        <Label x:Name="MessageText"
+                               Text=""
+                               TextColor="Black"
+                               FontSize="16"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

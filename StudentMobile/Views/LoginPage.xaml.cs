@@ -28,12 +28,12 @@ public partial class LoginPage : ContentPage
 
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
             {
-                await DisplayAlert("Validation Error", "Please enter both username and password.", "OK");
+                await ShowMessageOverlay("Please enter both username and password", "message_icon.svg", 2000);
                 return;
             }
 
-            // Show loading alert
-            await DisplayAlert("Login", "Logging in...", "OK");
+            // Show loading overlay
+            await ShowLoadingOverlay("Logging in...");
 
             var loginRequest = new LoginRequest
             {
@@ -50,7 +50,8 @@ public partial class LoginPage : ContentPage
                     // Save student ID using Preferences
                     Preferences.Set("StudentId", result.AccountID);
 
-                    await DisplayAlert("Success", "Login successful!", "OK");
+                    // Show success message
+                    await ShowMessageOverlay("Login successful!", "success_icon.svg", 3000);
 
                     // Navigate to AttendancePage
                     var attendancePage = new Views.AttendancePage();
@@ -58,17 +59,45 @@ public partial class LoginPage : ContentPage
                 }
                 else
                 {
-                    await DisplayAlert("Access Denied", "Access denied. Only students can login.", "OK");
+                    // Show access denied message
+                    await ShowMessageOverlay("Access denied. Only students can login.", "message_icon.svg", 3000);
                 }
             }
             else
             {
-                await DisplayAlert("Login Failed", "Invalid username or password.", "OK");
+                // Show login failed message
+                await ShowMessageOverlay("Invalid username or password.", "message_icon.svg", 3000);
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Login Error", $"Login error: {ex.Message}", "OK");
+            await ShowMessageOverlay($"Login error: {ex.Message}", "message_icon.svg", 3000);
         }
+    }
+
+    private async Task ShowLoadingOverlay(string message)
+    {
+        LoadingMessage.Text = message;
+        LoadingIcon.Source = "loading_icon.svg";
+        LoadingFrame.IsVisible = true;
+        MessageFrame.IsVisible = false;
+        LoadingOverlay.IsVisible = true;
+        
+        await Task.Delay(2000);
+        
+        LoadingOverlay.IsVisible = false;
+    }
+
+    private async Task ShowMessageOverlay(string message, string iconName, int delayMs)
+    {
+        MessageText.Text = message;
+        MessageIcon.Source = iconName;
+        LoadingFrame.IsVisible = false;
+        MessageFrame.IsVisible = true;
+        LoadingOverlay.IsVisible = true;
+        
+        await Task.Delay(delayMs);
+        
+        LoadingOverlay.IsVisible = false;
     }
 }
