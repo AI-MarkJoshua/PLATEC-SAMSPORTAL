@@ -249,6 +249,51 @@ namespace AdminWebPage.Controllers
             
             return Ok();
         }
+        public async Task<IActionResult> GetAttendanceDetails(DateTime date, int sectionId)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions
+            if (userRole != "Admin" && userRole != "Student" && userRole != "Teacher")
+            {
+                return Json(new { success = false, message = "Access Denied." });
+            }
+
+            // Get attendance details for the specific date and section
+            var attendanceDetails = await _context.Attendances
+                .Include(a => a.Student)
+                    .ThenInclude(s => s.Section)
+                .Where(a => a.Date.Date == date.Date && a.Student.SectionID == sectionId)
+                .ToListAsync();
+
+            // Get section and teacher info
+            var section = await _context.Sections
+                .Include(s => s.TeacherSections)
+                    .ThenInclude(ts => ts.Teacher)
+                .FirstOrDefaultAsync(s => s.SectionID == sectionId);
+
+            var teacherName = section?.TeacherSections?.FirstOrDefault()?.Teacher?.FName + " " + 
+                            section?.TeacherSections?.FirstOrDefault()?.Teacher?.LName ?? "Unknown";
+
+            var result = new
+            {
+                success = true,
+                date = date.ToString("MMM dd, yyyy"),
+                sectionName = section?.SectionName ?? "Unknown",
+                teacherName = teacherName,
+                attendance = attendanceDetails.Select(a => new
+                {
+                    studentName = a.Student?.FName + " " + a.Student?.LName,
+                    status = a.Status,
+                    statusClass = a.Status == "Present" ? "success" : 
+                                 a.Status == "Absent" ? "danger" : "warning"
+                }).ToList()
+            };
+
+            return Json(result);
+        }
+
         public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate, int? selectedTeacherId, int? selectedSectionId, string searchStudentName)
         {
             var userRole = HttpContext.Session.GetString("UserRole");
