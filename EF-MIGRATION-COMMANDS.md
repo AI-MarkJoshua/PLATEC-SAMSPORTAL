@@ -38,6 +38,7 @@ dotnet ef migrations remove
 1. **"Build failed"** → Stop running app, then try again
 2. **"Cannot find path"** → Use full path: `cd Desktop\SAMS-CLONING-PROJECT\AdminWebPage`
 3. **"File is locked"** → Close Visual Studio or stop running processes
+4. **"Invalid file names detected"** → Rename image files to lowercase (e.g., MKA.png → mka.png)
 
 ## Setup for New Computer
 ```powershell
