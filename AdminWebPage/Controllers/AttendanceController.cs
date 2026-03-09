@@ -294,6 +294,289 @@ namespace AdminWebPage.Controllers
             return Json(result);
         }
 
+        public async Task<IActionResult> StudentReport(DateTime? startDate, DateTime? endDate, int? selectedTeacherId, int? selectedSectionId, string searchStudentName)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions - Admin, Student, and Teacher can access student reports
+            if (userRole != "Admin" && userRole != "Student" && userRole != "Teacher")
+            {
+                TempData["Error"] = "Access Denied.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var reportData = new List<AttendanceReportViewModel>();
+            var detailedList = new List<dynamic>();
+
+            // Pass selections to ViewBag
+            ViewBag.StartDate = startDate;
+            ViewBag.EndDate = endDate;
+            ViewBag.SelectedTeacherId = selectedTeacherId;
+            ViewBag.SelectedSectionId = selectedSectionId;
+            ViewBag.SearchStudentName = searchStudentName;
+
+            var studentsQuery = _context.Accounts.Where(a => a.Role == "Student");
+
+            // Apply Filters based on role and selections
+            if (userRole == "Teacher")
+            {
+                studentsQuery = studentsQuery.Where(a => a.TeacherID == accountId);
+                
+                var teacherSections = await _context.TeacherSections
+                    .Where(ts => ts.TeacherID == accountId)
+                    .Include(ts => ts.Section)
+                    .ToListAsync();
+                
+                ViewBag.TeacherSections = teacherSections;
+                
+                if (selectedSectionId.HasValue)
+                {
+                    studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                }
+            }
+            else
+            {
+                // Admin / Student
+                var teachers = await _context.Accounts
+                    .Where(a => a.Role == "Teacher")
+                    .OrderBy(a => a.LName)
+                    .ThenBy(a => a.FName)
+                    .ToListAsync();
+                
+                ViewBag.Teachers = teachers;
+
+                var allTeacherSections = await _context.TeacherSections
+                    .Include(ts => ts.Section)
+                    .ToListAsync();
+                
+                ViewBag.TeacherSections = allTeacherSections;
+
+                if (selectedTeacherId.HasValue)
+                {
+                    ViewBag.SelectedTeacherName = teachers.FirstOrDefault(t => t.AccountID == selectedTeacherId.Value)?.FName + " " + teachers.FirstOrDefault(t => t.AccountID == selectedTeacherId.Value)?.LName;
+
+                    var teacherSectionIds = allTeacherSections.Where(ts => ts.TeacherID == selectedTeacherId.Value).Select(ts => ts.SectionID).ToList();
+                    studentsQuery = studentsQuery.Where(a => teacherSectionIds.Contains(a.SectionID.Value));
+                    
+                    if (selectedSectionId.HasValue)
+                    {
+                        ViewBag.SelectedSectionName = allTeacherSections.FirstOrDefault(ts => ts.SectionID == selectedSectionId.Value)?.Section?.SectionName;
+                        studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                    }
+                }
+                else if (selectedSectionId.HasValue)
+                {
+                    ViewBag.SelectedSectionName = allTeacherSections.FirstOrDefault(ts => ts.SectionID == selectedSectionId.Value)?.Section?.SectionName;
+                    studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+                }
+            }
+
+            // Get a list of all student full names BEFORE filtering by search string, to populate the autocomplete datalist
+            var allStudentNames = await studentsQuery
+                .Select(s => s.FName + " " + (string.IsNullOrEmpty(s.MName) ? "" : s.MName + " ") + s.LName)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToListAsync();
+            
+            ViewBag.AllStudentNames = allStudentNames;
+
+            // Student Name Search Filter
+            if (!string.IsNullOrWhiteSpace(searchStudentName))
+            {
+                var searchTerms = searchStudentName.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                
+                foreach (var term in searchTerms)
+                {
+                    studentsQuery = studentsQuery.Where(a => 
+                        (a.FName != null && a.FName.ToLower().Contains(term)) ||
+                        (a.LName != null && a.LName.ToLower().Contains(term)) ||
+                        (a.MName != null && a.MName.ToLower().Contains(term))
+                    );
+                }
+            }
+            
+            var students = await studentsQuery.ToListAsync();
+
+            // If no students match the filters or if we don't have valid dates, return empty report early
+            if (!students.Any() || startDate == null || endDate == null)
+            {
+                ViewBag.DetailedList = detailedList;
+                ViewBag.NoAttendanceFound = !students.Any() || (startDate != null && endDate != null);
+                return View(reportData);
+            }
+
+            for (var date = startDate.Value.Date; date <= endDate.Value.Date; date = date.AddDays(1))
+            {
+                // Only load attendance for the filtered students
+                var studentIds = students.Select(s => s.AccountID).ToList();
+                var dailyAttendance = await _context.Attendances
+                    .Where(a => a.Date >= date && a.Date < date.AddDays(1) && studentIds.Contains(a.StudentId))
+                    .Include(a => a.Student)
+                    .ToListAsync();
+
+                reportData.Add(new AttendanceReportViewModel
+                {
+                    Date = date,
+                    TotalStudents = students.Count,
+                    PresentCount = dailyAttendance.Count(a => a.Status == "Present"),
+                    AbsentCount = dailyAttendance.Count(a => a.Status == "Absent"),
+                    LateCount = dailyAttendance.Count(a => a.Status == "Late"),
+                });
+
+                // Fill detailed list
+                foreach (var student in students)
+                {
+                    var status = dailyAttendance.FirstOrDefault(a => a.StudentId == student.AccountID)?.Status ?? "N/A";
+
+                    detailedList.Add(new
+                    {
+                        Date = date.ToString("yyyy-MM-dd"),
+                        student.FName,
+                        student.MName,
+                        student.LName,
+                        Remarks = status
+                    });
+                }
+            }
+
+            ViewBag.DetailedList = detailedList;
+            ViewBag.NoAttendanceFound = !detailedList.Any();
+
+            return View(reportData);
+        }
+
+        public async Task<IActionResult> TeacherReport(DateTime? startDate, DateTime? endDate, int? selectedTeacherId, int? selectedSectionId)
+        {
+            var userRole = HttpContext.Session.GetString("UserRole");
+            var accountId = HttpContext.Session.GetInt32("AccountID");
+            
+            // Check permissions - Admin and Teacher can access teacher reports
+            if (userRole != "Admin" && userRole != "Teacher")
+            {
+                TempData["Error"] = "Access Denied.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var reportData = new List<AttendanceReportViewModel>();
+            var detailedList = new List<dynamic>();
+
+            // Pass selections to ViewBag
+            ViewBag.StartDate = startDate;
+            ViewBag.EndDate = endDate;
+            ViewBag.SelectedTeacherId = selectedTeacherId;
+            ViewBag.SelectedSectionId = selectedSectionId;
+
+            var teachersQuery = _context.Accounts.Where(a => a.Role == "Teacher");
+
+            // Apply Filters based on role
+            if (userRole == "Teacher")
+            {
+                // Teachers can only see their own reports
+                teachersQuery = teachersQuery.Where(a => a.AccountID == accountId);
+                selectedTeacherId = accountId;
+            }
+            else
+            {
+                // Admin can select any teacher
+                var teachersList = await teachersQuery
+                    .OrderBy(a => a.LName)
+                    .ThenBy(a => a.FName)
+                    .ToListAsync();
+                
+                ViewBag.Teachers = teachersList;
+
+                if (selectedTeacherId.HasValue)
+                {
+                    ViewBag.SelectedTeacherName = teachersList.FirstOrDefault(t => t.AccountID == selectedTeacherId.Value)?.FName + " " + teachersList.FirstOrDefault(t => t.AccountID == selectedTeacherId.Value)?.LName;
+                    teachersQuery = teachersQuery.Where(a => a.AccountID == selectedTeacherId.Value);
+                }
+            }
+
+            var teachers = await teachersQuery.ToListAsync();
+
+            // Get sections for the selected teachers
+            var teacherSectionIds = await _context.TeacherSections
+                .Where(ts => teachers.Select(t => t.AccountID).Contains(ts.TeacherID))
+                .Select(ts => ts.SectionID)
+                .ToListAsync();
+
+            var allTeacherSections = await _context.TeacherSections
+                .Include(ts => ts.Section)
+                .Where(ts => teacherSectionIds.Contains(ts.SectionID))
+                .ToListAsync();
+
+            ViewBag.TeacherSections = allTeacherSections;
+
+            if (selectedSectionId.HasValue)
+            {
+                ViewBag.SelectedSectionName = allTeacherSections.FirstOrDefault(ts => ts.SectionID == selectedSectionId.Value)?.Section?.SectionName;
+            }
+
+            // If no teachers match the filters or if we don't have valid dates, return empty report early
+            if (!teachers.Any() || startDate == null || endDate == null)
+            {
+                ViewBag.DetailedList = detailedList;
+                ViewBag.NoReportFound = !teachers.Any() || (startDate != null && endDate != null);
+                return View(reportData);
+            }
+
+            // Get students assigned to the selected teachers
+            var studentsQuery = _context.Accounts.Where(a => a.Role == "Student" && a.TeacherID.HasValue && teachers.Select(t => t.AccountID).Contains(a.TeacherID.Value));
+
+            if (selectedSectionId.HasValue)
+            {
+                studentsQuery = studentsQuery.Where(a => a.SectionID == selectedSectionId.Value);
+            }
+
+            var students = await studentsQuery.ToListAsync();
+
+            for (var date = startDate.Value.Date; date <= endDate.Value.Date; date = date.AddDays(1))
+            {
+                // Only load attendance for the filtered students
+                var studentIds = students.Select(s => s.AccountID).ToList();
+                var dailyAttendance = await _context.Attendances
+                    .Where(a => a.Date >= date && a.Date < date.AddDays(1) && studentIds.Contains(a.StudentId))
+                    .Include(a => a.Student)
+                    .ToListAsync();
+
+                reportData.Add(new AttendanceReportViewModel
+                {
+                    Date = date,
+                    TotalStudents = students.Count(),
+                    PresentCount = dailyAttendance.Count(a => a.Status == "Present"),
+                    AbsentCount = dailyAttendance.Count(a => a.Status == "Absent"),
+                    LateCount = dailyAttendance.Count(a => a.Status == "Late"),
+                });
+
+                // Fill detailed list with teacher information
+                foreach (var teacher in teachers)
+                {
+                    var teacherStudents = students.Where(s => s.TeacherID == teacher.AccountID).ToList();
+                    var teacherAttendance = dailyAttendance.Where(a => teacherStudents.Select(s => s.AccountID).Contains(a.StudentId)).ToList();
+
+                    detailedList.Add(new
+                    {
+                        Date = date.ToString("yyyy-MM-dd"),
+                        TeacherName = teacher.FName + " " + teacher.LName,
+                        TotalStudents = teacherStudents.Count(),
+                        PresentCount = teacherAttendance.Count(a => a.Status == "Present"),
+                        AbsentCount = teacherAttendance.Count(a => a.Status == "Absent"),
+                        LateCount = teacherAttendance.Count(a => a.Status == "Late"),
+                        SectionName = selectedSectionId.HasValue ? 
+                            allTeacherSections.FirstOrDefault(ts => ts.SectionID == selectedSectionId.Value)?.Section?.SectionName : 
+                            "All Subjects"
+                    });
+                }
+            }
+
+            ViewBag.DetailedList = detailedList;
+            ViewBag.NoReportFound = !detailedList.Any();
+
+            return View(reportData);
+        }
+
+
         public async Task<IActionResult> Reports(DateTime? startDate, DateTime? endDate, int? selectedTeacherId, int? selectedSectionId, string searchStudentName)
         {
             var userRole = HttpContext.Session.GetString("UserRole");

@@ -1,0 +1,243 @@
+@model List<AdminWebPage.Shared.Models.AttendanceReportViewModel>
+
+<h2>Student Attendance Report</h2>
+
+<!-- Container for Dates and Generate Button -->
+<div class="p-3 mb-3" style="background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <form method="get" class="row g-3 align-items-end" id="reportFilterForm">
+        
+        @{
+            var userRole = Context.Session.GetString("UserRole");
+        }
+
+        <div class="@(userRole == "Admin" ? "col-md-2" : "col-md-3")">
+            <label class="form-label">Student Name</label>
+            <input type="text" name="searchStudentName" class="form-control" value="@ViewBag.SearchStudentName" placeholder="Search name..." list="studentNameOptions" autocomplete="off" />
+            
+            <datalist id="studentNameOptions">
+                @if (ViewBag.AllStudentNames != null)
+                {
+                    foreach (var name in ViewBag.AllStudentNames)
+                    {
+                        <option value="@name"></option>
+                    }
+                }
+            </datalist>
+        </div>
+
+        @if (userRole == "Admin")
+        {
+            <div class="col-md-2">
+                <label class="form-label">Select Teacher</label>
+                <select name="selectedTeacherId" class="form-select" id="teacherSelect">
+                    <option value="">-- All Teachers --</option>
+                    @if (ViewBag.Teachers != null)
+                    {
+                        @foreach (var teacher in ViewBag.Teachers)
+                        {
+                            var isSelected = ViewBag.SelectedTeacherId?.ToString() == teacher.AccountID.ToString();
+                            <option value="@teacher.AccountID" selected="@isSelected">@teacher.FName @teacher.LName (@teacher.Username)</option>
+                        }
+                    }
+                </select>
+            </div>
+        }
+
+        <div class="@(userRole == "Admin" ? "col-md-2" : "col-md-3")">
+            <label class="form-label">Select Subject</label>
+            <select name="selectedSectionId" class="form-select" id="subjectSelect">
+                <option value="">-- All Subjects --</option>
+                @if (ViewBag.TeacherSections != null)
+                {
+                    @foreach (var sectionItem in ViewBag.TeacherSections)
+                    {
+                        var isSelected = ViewBag.SelectedSectionId?.ToString() == sectionItem.SectionID.ToString();
+                        <option value="@sectionItem.SectionID" selected="@isSelected" data-teacher-id="@sectionItem.TeacherID">@sectionItem.Section.SectionName</option>
+                    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate?.ToString("yyyy-MM-dd")" required />
+        </div>
+        
+        <div class="col-md-2">
+            <label class="form-label">End Date</label>
+            <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate?.ToString("yyyy-MM-dd")" required />
+        </div>
+        
+        <div class="col-md-2 d-flex flex-column justify-content-end gap-2">
+            <button type="submit" class="btn w-100" style="background-color: #20274a; color: white;">View Report</button>
+            <a href="/Attendance/StudentReport" class="btn btn-outline-secondary w-100">Clear Filters</a>
+        </div>
+    </form>
+</div>
+
+@if (Model.Any())
+{
+    <!-- Print Button aligned to the right -->
+    <div class="mb-3 d-flex justify-content-end">
+        <button class="btn btn-success" onclick="printReport()">Print Report</button>
+    </div>
+
+    <!-- Report Content Wrapper -->
+    <div id="reportContent">
+        <!-- Header Image -->
+        <div class="text-center mb-3">
+            <img src="~/image/mkaHeader.png" alt="MKA Header" class="img-fluid" />
+        </div>
+
+        <!-- Header Information -->
+        @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
+        {
+            <div class="text-center mb-4">
+                <h4 class="mb-2"><strong>Student Attendance Report</strong></h4>
+                
+                @if (!string.IsNullOrEmpty(ViewBag.SelectedTeacherName))
+                {
+                    <h5 class="mb-1"><strong>@ViewBag.SelectedTeacherName</strong></h5>
+                }
+                
+                @if (!string.IsNullOrEmpty(ViewBag.SelectedSectionName))
+                {
+                    <h5 class="mb-2"><strong>@ViewBag.SelectedSectionName</strong></h5>
+                }
+                
+                @if (!string.IsNullOrEmpty(ViewBag.SearchStudentName))
+                {
+                    <h5 class="mb-1"><strong>Student: @ViewBag.SearchStudentName</strong></h5>
+                }
+                
+                <h5><strong>@(((DateTime)ViewBag.StartDate).ToString("MMM dd, yyyy"))</strong> to <strong>@(((DateTime)ViewBag.EndDate).ToString("MMM dd, yyyy"))</strong></h5>
+            </div>
+        }
+
+        <!-- Summary Section -->
+        <div class="card mb-3">
+            <div class="card-header bg-light"><strong>Summary</strong></div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Total Students</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Late</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@Model.Sum(m => m.TotalStudents)</td>
+                            <td>@Model.Sum(m => m.PresentCount)</td>
+                            <td>@Model.Sum(m => m.AbsentCount)</td>
+                            <td>@Model.Sum(m => m.LateCount)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detailed List Section -->
+        <div class="card mb-3">
+            <div class="card-header bg-light"><strong>Detailed Attendance</strong></div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>First Name</th>
+                            <th>Middle Name</th>
+                            <th>Last Name</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in (List<dynamic>)ViewBag.DetailedList)
+                        {
+                            <tr>
+                                <td>@item.Date</td>
+                                <td>@item.FName</td>
+                                <td>@item.MName</td>
+                                <td>@item.LName</td>
+                                <td>@item.Remarks</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function printReport() {
+            var printContents = document.getElementById('reportContent').innerHTML;
+            var originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = printContents;
+            window.print();
+            document.body.innerHTML = originalContents;
+            location.reload(); // reload page to restore JS functionality
+        }
+
+        // Filter subjects based on teacher selection (for admin)
+        document.getElementById('teacherSelect')?.addEventListener('change', function() {
+            const selectedTeacherId = this.value;
+            const subjectSelect = document.getElementById('subjectSelect');
+            
+            // Get all subject options
+            const options = subjectSelect.querySelectorAll('option');
+            
+            options.forEach(option => {
+                if (option.value === '') {
+                    // Keep the "All Subjects" option visible
+                    option.style.display = 'block';
+                } else {
+                    const teacherId = option.getAttribute('data-teacher-id');
+                    if (selectedTeacherId === '') {
+                        // If "All Teachers" is selected, show all subjects
+                        option.style.display = 'block';
+                    } else {
+                        // Only show subjects belonging to selected teacher
+                        option.style.display = teacherId === selectedTeacherId ? 'block' : 'none';
+                    }
+                }
+            });
+            
+            // Reset subject selection if current selection is not visible
+            const currentSelection = subjectSelect.value;
+            if (currentSelection && subjectSelect.querySelector(`option[value="${currentSelection}"]`).style.display === 'none') {
+                subjectSelect.value = '';
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Trigger teacher filter on page load for admin
+            const teacherSelect = document.getElementById('teacherSelect');
+            if (teacherSelect) {
+                teacherSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+}
+else
+{
+    <!-- No Attendance Found Message -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-user-graduate" style="font-size: 4rem; color: #6c757d;"></i>
+        </div>
+        <h4 class="text-muted mb-3">No Attendance Found</h4>
+        <p class="text-muted">
+            @if (ViewBag.StartDate != null && ViewBag.EndDate != null)
+            {
+                <span>No attendance records found for the selected criteria from @(((DateTime)ViewBag.StartDate).ToString("MMM dd, yyyy")) to @(((DateTime)ViewBag.EndDate).ToString("MMM dd, yyyy")).</span>
+            }
+            else
+            {
+                <span>No attendance records found. Please select a date range and try again.</span>
+            }
+        </p>
+    </div>
+}

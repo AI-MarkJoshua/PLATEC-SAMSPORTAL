@@ -81,14 +81,35 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-3
-   @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" &&
-     ViewContext.RouteData.Values["action"]?.ToString() == "Reports" ? "active" : "")"
-                       asp-controller="Attendance" asp-action="Reports">
+                    <div class="nav-link d-flex align-items-center gap-3"
+                         style="cursor: pointer;"
+                         onclick="toggleAttendanceReportsDropdown()">
                         <i class="bi bi-file-earmark-text fs-4"></i>
                         Attendance Reports
-                    </a>
+                        <i class="bi bi-chevron-down ms-auto" id="attendanceDropdownIcon"></i>
+                    </div>
 
+                    <!-- Submenu for Attendance Reports -->
+                    <ul class="nav nav-pills flex-column gap-1 ms-3 mt-2" id="attendanceReportsSubmenu" style="display: none;">
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-3
+           @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" &&
+             ViewContext.RouteData.Values["action"]?.ToString() == "StudentReport" ? "active" : "")"
+                               asp-controller="Attendance" asp-action="StudentReport">
+                                <i class="bi bi-person-lines-fill fs-5"></i>
+                                Student Report
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link d-flex align-items-center gap-3
+           @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" &&
+             ViewContext.RouteData.Values["action"]?.ToString() == "TeacherReport" ? "active" : "")"
+                               asp-controller="Attendance" asp-action="TeacherReport">
+                                <i class="bi bi-person-badge fs-5"></i>
+                                Teacher Report
+                            </a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
 
@@ -114,6 +135,36 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        function toggleAttendanceReportsDropdown() {
+            const submenu = document.getElementById('attendanceReportsSubmenu');
+            const icon = document.getElementById('attendanceDropdownIcon');
+            
+            if (submenu.style.display === 'none') {
+                submenu.style.display = 'block';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            } else {
+                submenu.style.display = 'none';
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            }
+        }
+
+        // Keep submenu open if any of the submenu items are active
+        window.addEventListener('DOMContentLoaded', () => {
+            const activeSubmenuItem = document.querySelector('#attendanceReportsSubmenu .nav-link.active');
+            if (activeSubmenuItem) {
+                const submenu = document.getElementById('attendanceReportsSubmenu');
+                const icon = document.getElementById('attendanceDropdownIcon');
+                submenu.style.display = 'block';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
+            }
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
