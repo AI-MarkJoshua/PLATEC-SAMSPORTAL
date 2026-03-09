@@ -36,6 +36,10 @@ namespace AdminWebPage.Controllers
 
                 ViewBag.TotalAdmins = await _context.Accounts
                     .CountAsync(a => a.Role == "Admin");
+
+                // New metrics for admin
+                ViewBag.TotalSubjects = await _context.Sections.CountAsync();
+                ViewBag.TotalAttendanceCreated = await _context.Attendances.CountAsync();
             }
             else if (userRole == "Teacher")
             {

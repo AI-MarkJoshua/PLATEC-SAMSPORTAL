@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Dashboard";
     var data = ViewBag.ChartData;
+    var userRole = Context.Session.GetString("UserRole");
 }
 
 <h2 class="mb-4">Dashboard</h2>
@@ -40,35 +41,75 @@
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-             style="--accent-color:#1f9e4b; --accent-color-light:#54d261;">
+    @if (userRole == "Admin")
+    {
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color:#ff6b6b; --accent-color-light:#ff8787;">
 
-            <div class="me-3 summary-icon">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-book-fill"></i>
+                </div>
 
-            <div class="text-start">
-                <h6 class="mb-1">Present Today</h6>
-                <h3 class="mb-0">@ViewBag.PresentToday</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-             style="--accent-color:#f55e5f; --accent-color-light:#f78485;">
-
-            <div class="me-3 summary-icon">
-                <i class="bi bi-x-circle-fill"></i>
-            </div>
-
-            <div class="text-start">
-                <h6 class="mb-1">Absent Today</h6>
-                <h3 class="mb-0">@ViewBag.AbsentToday</h3>
+                <div class="text-start">
+                    <h6 class="mb-1">Total Subjects</h6>
+                    <h3 class="mb-0">@ViewBag.TotalSubjects</h3>
+                </div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color:#1f9e4b; --accent-color-light:#54d261;">
+
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Present Today</h6>
+                    <h3 class="mb-0">@ViewBag.PresentToday</h3>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (userRole == "Admin")
+    {
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color:#4ecdc4; --accent-color-light:#6ee7df;">
+
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-clipboard-data-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Total Attendance Created</h6>
+                    <h3 class="mb-0">@ViewBag.TotalAttendanceCreated</h3>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color:#f55e5f; --accent-color-light:#f78485;">
+
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Absent Today</h6>
+                    <h3 class="mb-0">@ViewBag.AbsentToday</h3>
+                </div>
+            </div>
+        </div>
+    }
 
 </div>
 
