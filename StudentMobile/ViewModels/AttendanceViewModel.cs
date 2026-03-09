@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using StudentMobile.Models;
 using StudentMobile.Services;
 using Microsoft.Maui.Storage;
-
+using System.Linq;
 
 namespace StudentMobile.ViewModels
 {
@@ -16,6 +16,15 @@ namespace StudentMobile.ViewModels
 
         [ObservableProperty]
         private bool isLoading;
+
+        [ObservableProperty]
+        private int presentCount;
+
+        [ObservableProperty]
+        private int absentCount;
+
+        [ObservableProperty]
+        private int lateCount;
 
         public AttendanceViewModel()
         {
@@ -36,7 +45,13 @@ namespace StudentMobile.ViewModels
                     
                     AttendanceRecords = await _apiService.GetMyAttendanceAsync(studentId);
                     
+                    // Calculate statistics
+                    PresentCount = AttendanceRecords.Count(a => a.Status == "Present");
+                    AbsentCount = AttendanceRecords.Count(a => a.Status == "Absent");
+                    LateCount = AttendanceRecords.Count(a => a.Status == "Late");
+                    
                     System.Diagnostics.Debug.WriteLine($"Loaded {AttendanceRecords.Count} attendance records");
+                    System.Diagnostics.Debug.WriteLine($"Present: {PresentCount}, Absent: {AbsentCount}, Late: {LateCount}");
                 }
                 else
                 {

@@ -1,24 +1,103 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:StudentMobile.ViewModels"
-             x:Class="StudentMobile.Views.AttendancePage">
+             x:Class="StudentMobile.Views.AttendancePage"
+             BackgroundColor="#F8F9FA">
 
     <ContentPage.BindingContext>
         <vm:AttendanceViewModel/>
     </ContentPage.BindingContext>
 
-    <StackLayout Padding="20">
-        <Label Text="My Attendance" FontSize="20" HorizontalOptions="Center"/>
-        <CollectionView ItemsSource="{Binding AttendanceRecords}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <StackLayout Orientation="Horizontal" Padding="10">
-                        <Label Text="{Binding Date, StringFormat='{0:MMM dd, yyyy}'}" WidthRequest="120"/>
-                        <Label Text="{Binding Status}" HorizontalOptions="StartAndExpand"/>
-                    </StackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
-    </StackLayout>
+    <ContentPage.Resources>
+        <vm:StatusToColorConverter x:Key="StatusToColorConverter"/>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="20">
+            <!-- Header Section -->
+            <Frame BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True">
+                <StackLayout Spacing="15">
+                    <Label Text="My Attendance" 
+                           FontSize="24" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center"
+                           TextColor="#2C3E50"/>
+                    
+                    <!-- Stats Summary -->
+                    <Grid ColumnDefinitions="*,*,*" Padding="0,10,0,0">
+                        <Frame Grid.Column="0" BackgroundColor="#E8F5E8" CornerRadius="10" Padding="15">
+                            <StackLayout>
+                                <Label Text="Present" FontSize="12" TextColor="#4CAF50" HorizontalOptions="Center"/>
+                                <Label Text="{Binding PresentCount}" FontSize="20" FontAttributes="Bold" TextColor="#4CAF50" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Frame>
+                        
+                        <Frame Grid.Column="1" BackgroundColor="#FFEBEE" CornerRadius="10" Padding="15">
+                            <StackLayout>
+                                <Label Text="Absent" FontSize="12" TextColor="#F44336" HorizontalOptions="Center"/>
+                                <Label Text="{Binding AbsentCount}" FontSize="20" FontAttributes="Bold" TextColor="#F44336" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Frame>
+                        
+                        <Frame Grid.Column="2" BackgroundColor="#FFF3E0" CornerRadius="10" Padding="15">
+                            <StackLayout>
+                                <Label Text="Late" FontSize="12" TextColor="#FF9800" HorizontalOptions="Center"/>
+                                <Label Text="{Binding LateCount}" FontSize="20" FontAttributes="Bold" TextColor="#FF9800" HorizontalOptions="Center"/>
+                            </StackLayout>
+                        </Frame>
+                    </Grid>
+                </StackLayout>
+            </Frame>
+
+            <!-- Attendance Records List -->
+            <Frame BackgroundColor="White" CornerRadius="15" HasShadow="True">
+                <StackLayout Spacing="15">
+                    <Label Text="Attendance History" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#2C3E50"
+                           Margin="0,0,0,10"/>
+                    
+                    <CollectionView ItemsSource="{Binding AttendanceRecords}" HeightRequest="400">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="#F8F9FA" CornerRadius="10" Padding="15" Margin="0,5">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+                                        <!-- Date Column -->
+                                        <StackLayout Grid.Column="0" Grid.Row="0" VerticalOptions="Center">
+                                            <Label Text="{Binding Date, StringFormat='{0:MMM dd}'}" 
+                                                   FontSize="14" 
+                                                   FontAttributes="Bold"
+                                                   TextColor="#666666"/>
+                                            <Label Text="{Binding Date, StringFormat='{0:yyyy}'}" 
+                                                   FontSize="12" 
+                                                   TextColor="#999999"/>
+                                        </StackLayout>
+                                        
+                                        <!-- Status Column -->
+                                        <StackLayout Grid.Column="1" Grid.Row="0" HorizontalOptions="End" VerticalOptions="Center">
+                                            <Frame CornerRadius="20" Padding="10,5" HasShadow="False"
+                                                        BackgroundColor="{Binding Status, Converter={StaticResource StatusToColorConverter}}">
+                                                <Label Text="{Binding Status}" 
+                                                       FontSize="14" 
+                                                       FontAttributes="Bold"
+                                                       TextColor="White"
+                                                       HorizontalOptions="Center"/>
+                                            </Frame>
+                                        </StackLayout>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+            </Frame>
+
+            <!-- Loading Indicator -->
+            <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                               IsVisible="{Binding IsLoading}"
+                               Color="#2C3E50"
+                               HeightRequest="40"/>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>
