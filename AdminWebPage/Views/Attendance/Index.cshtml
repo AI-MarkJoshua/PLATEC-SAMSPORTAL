@@ -167,23 +167,26 @@
                                             <td class="text-center">
                                                 <div class="d-inline-flex gap-2">
                                                     <button type="button"
-                                                            class="btn attendance-btn @(status == "Present" ? "btn-success active" : "btn-outline-success")"
+                                                            class="btn attendance-btn @(status == "Present" ? "active" : "")"
                                                             data-student="@student.AccountID"
-                                                            data-status="Present">
+                                                            data-status="Present"
+                                                            style="@(status == "Present" ? "background-color: #20274a; border-color: #20274a; color: white;" : "border-color: #20274a; color: #20274a;")">
                                                         Present
                                                     </button>
 
                                                     <button type="button"
-                                                            class="btn attendance-btn @(status == "Absent" ? "btn-danger active" : "btn-outline-danger")"
+                                                            class="btn attendance-btn @(status == "Absent" ? "active" : "")"
                                                             data-student="@student.AccountID"
-                                                            data-status="Absent">
+                                                            data-status="Absent"
+                                                            style="@(status == "Absent" ? "background-color: #20274a; border-color: #20274a; color: white;" : "border-color: #20274a; color: #20274a;")">
                                                         Absent
                                                     </button>
 
                                                     <button type="button"
-                                                            class="btn attendance-btn @(status == "Late" ? "btn-warning active" : "btn-outline-warning")"
+                                                            class="btn attendance-btn @(status == "Late" ? "active" : "")"
                                                             data-student="@student.AccountID"
-                                                            data-status="Late">
+                                                            data-status="Late"
+                                                            style="@(status == "Late" ? "background-color: #20274a; border-color: #20274a; color: white;" : "border-color: #20274a; color: #20274a;")">
                                                         Late
                                                     </button>
                                                 </div>
@@ -206,9 +209,9 @@
                 <div class="modal-footer">
                     @if (Model.Any())
                     {
-                        <button type="button" class="btn btn-success" id="saveAttendanceBtn">Save Attendance</button>
+                        <button type="button" class="btn" id="saveAttendanceBtn" style="background-color: #20274a; border-color: #20274a; color: white;">Save Attendance</button>
                     }
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-color: #6c757d; color: #6c757d;" onmouseover="this.style.backgroundColor='#6c757d'; this.style.color='white';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#6c757d';">Close</button>
                 </div>
             </div>
         </div>
@@ -282,16 +285,17 @@
 
             // Remove active classes from siblings
             parent.querySelectorAll('.attendance-btn').forEach(b => {
-                b.classList.remove('active', 'btn-success', 'btn-danger', 'btn-warning');
-                if (b.dataset.status === 'Present') b.classList.add('btn-outline-success');
-                if (b.dataset.status === 'Absent') b.classList.add('btn-outline-danger');
-                if (b.dataset.status === 'Late') b.classList.add('btn-outline-warning');
+                b.classList.remove('active');
+                b.style.backgroundColor = 'transparent';
+                b.style.color = '#20274a';
+                b.style.borderColor = '#20274a';
             });
 
             // Apply active style to clicked button
-            if (status === 'Present') this.classList.add('btn-success', 'active');
-            if (status === 'Absent') this.classList.add('btn-danger', 'active');
-            if (status === 'Late') this.classList.add('btn-warning', 'active');
+            this.classList.add('active');
+            this.style.backgroundColor = '#20274a';
+            this.style.color = 'white';
+            this.style.borderColor = '#20274a';
 
             // Save locally in JS
             attendanceState[studentId] = status;

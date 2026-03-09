@@ -53,6 +53,23 @@ body {
         color: #ffffff !important;
     }
 
+/* Top Navigation Bar */
+.top-navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.top-navbar .user-avatar img {
+    border: 2px solid #f0f0f0;
+    transition: border-color 0.2s ease;
+}
+
+.top-navbar .user-avatar img:hover {
+    border-color: #20274a;
+}
+
 .rounded-20 {
     border-radius: 15px;
 }
