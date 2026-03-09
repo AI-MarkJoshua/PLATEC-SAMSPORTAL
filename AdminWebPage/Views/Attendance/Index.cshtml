@@ -115,7 +115,10 @@
                         </td>
                         <td class="text-center">
                             <button type="button" 
-                                    class="btn btn-sm btn-outline-primary view-attendance-btn" 
+                                    class="btn btn-sm view-attendance-btn" 
+                                    style="border-color: #20274a; color: #20274a;"
+                                    onmouseover="this.style.backgroundColor='#20274a'; this.style.color='white';"
+                                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='#20274a';"
                                     data-date="@date.ToString("yyyy-MM-dd")"
                                     data-section-id="@sectionId"
                                     data-bs-toggle="modal" 
