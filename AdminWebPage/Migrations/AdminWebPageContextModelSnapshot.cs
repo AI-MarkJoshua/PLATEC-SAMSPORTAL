@@ -75,7 +75,7 @@ namespace AdminWebPage.Migrations
 
                     b.HasIndex("TeacherID");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("Accounts", (string)null);
                 });
 
             modelBuilder.Entity("AdminWebPage.Shared.Models.Attendance", b =>
@@ -100,7 +100,7 @@ namespace AdminWebPage.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Attendances");
+                    b.ToTable("Attendances", (string)null);
                 });
 
             modelBuilder.Entity("AdminWebPage.Shared.Models.Section", b =>
@@ -125,7 +125,7 @@ namespace AdminWebPage.Migrations
 
                     b.HasKey("SectionID");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Sections", (string)null);
                 });
 
             modelBuilder.Entity("AdminWebPage.Shared.Models.TeacherSection", b =>
@@ -151,7 +151,7 @@ namespace AdminWebPage.Migrations
 
                     b.HasIndex("TeacherID");
 
-                    b.ToTable("TeacherSections");
+                    b.ToTable("TeacherSections", (string)null);
                 });
 
             modelBuilder.Entity("AdminWebPage.Shared.Models.Account", b =>
