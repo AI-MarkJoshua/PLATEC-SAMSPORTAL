@@ -45,7 +45,7 @@
     {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color:#ff6b6b; --accent-color-light:#ff8787;">
+                 style="--accent-color:#23563c; --accent-color-light:#297443;">
 
                 <div class="me-3 summary-icon">
                     <i class="bi bi-book-fill"></i>
@@ -80,7 +80,7 @@
     {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color:#4ecdc4; --accent-color-light:#6ee7df;">
+                 style="--accent-color:#dd6c0a; --accent-color-light:#f57200;">
 
                 <div class="me-3 summary-icon">
                     <i class="bi bi-clipboard-data-fill"></i>
@@ -113,15 +113,18 @@
 
 </div>
 
-<!-- VIEW SWITCH -->
-<div class="mb-3">
-    <a class="btn btn-outline-primary btn-sm" href="?view=daily">Daily</a>
-    <a class="btn btn-outline-secondary btn-sm" href="?view=weekly">Weekly</a>
-</div>
-
 <!-- ATTENDANCE CHART -->
-<div class="card chart-card shadow-sm">
-    <canvas id="attendanceChart" height="510"></canvas> <!-- increased from 120 to 200 -->
+<div class="card chart-card shadow-sm p-4" style="max-height: 350px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0 fw-bold">Attendance Overview</h5>
+        <div class="btn-group btn-group-sm" role="group">
+            <a class="btn btn-outline-primary" href="?view=daily">Daily</a>
+            <a class="btn btn-outline-secondary" href="?view=weekly">Weekly</a>
+        </div>
+    </div>
+    <div style="height: 250px; position: relative;">
+        <canvas id="attendanceChart"></canvas>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -139,20 +142,101 @@
         data: {
             labels,
             datasets: [
-                { label:'Present', data: present, backgroundColor:'#1f9e4b', borderRadius:6, barThickness:18 },
-                { label:'Absent', data: absent, backgroundColor:'#f55e5f', borderRadius:6, barThickness:18 },
-                { label:'Late', data: late, backgroundColor:'#ffc107', borderRadius:6, barThickness:18 }
+                { 
+                    label:'Present', 
+                    data: present, 
+                    backgroundColor: '#1f9e4b',
+                    borderColor: '#1a7d3d',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barThickness: 'flex',
+                    maxBarThickness: 40
+                },
+                { 
+                    label:'Absent', 
+                    data: absent, 
+                    backgroundColor: '#f55e5f',
+                    borderColor: '#d64546',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barThickness: 'flex',
+                    maxBarThickness: 40
+                },
+                { 
+                    label:'Late', 
+                    data: late, 
+                    backgroundColor: '#ffc107',
+                    borderColor: '#e0a800',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barThickness: 'flex',
+                    maxBarThickness: 40
+                }
             ]
         },
         options: {
-            responsive:true,
+            responsive: true,
+            maintainAspectRatio: false,
+            devicePixelRatio: window.devicePixelRatio || 1,
             plugins: {
-                legend:{ position:'top', labels:{ color:'#20274a', boxWidth:12, font:{ size:12, weight:'500' } } },
-                tooltip:{ backgroundColor:'#20274a', titleColor:'#fff', bodyColor:'#fff', padding:10, cornerRadius:6 }
+                legend: { 
+                    position: 'top', 
+                    labels: { 
+                        color: '#20274a', 
+                        boxWidth: 12, 
+                        font: { size: 12, weight: '500' },
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'rectRounded'
+                    } 
+                },
+                tooltip: { 
+                    backgroundColor: '#20274a', 
+                    titleColor: '#fff', 
+                    bodyColor: '#fff', 
+                    padding: 10, 
+                    cornerRadius: 6,
+                    boxPadding: 3,
+                    titleFont: { weight: '600', size: 13 },
+                    bodyFont: { size: 12 },
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.y + ' students';
+                        }
+                    }
+                }
             },
             scales: {
-                x:{ grid:{ display:false }, ticks:{ color:'#6c757d' } },
-                y:{ beginAtZero:true, grid:{ color:'#f0f2f5' }, ticks:{ color:'#6c757d' } }
+                x: { 
+                    grid: { display: false }, 
+                    ticks: { 
+                        color: '#6c757d',
+                        font: { size: 11 },
+                        maxRotation: 45,
+                        minRotation: 0
+                    } 
+                },
+                y: { 
+                    beginAtZero: true, 
+                    grid: { 
+                        color: '#f0f2f5',
+                        drawBorder: false
+                    }, 
+                    ticks: { 
+                        color: '#6c757d',
+                        font: { size: 11 },
+                        stepSize: 1,
+                        precision: 0
+                    }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            animation: {
+                duration: 800,
+                easing: 'easeInOutQuart'
             }
         }
     });
