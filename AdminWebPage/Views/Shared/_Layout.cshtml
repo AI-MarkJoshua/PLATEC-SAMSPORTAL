@@ -135,9 +135,12 @@
                             <div class="fw-semibold text-dark">John Doe</div>
                             <div class="small text-muted">@userRole</div>
                         </div>
-                        <a class="btn btn-outline-danger btn-sm d-flex align-items-center gap-2" asp-controller="Auth" asp-action="Logout">
-                            <i class="bi bi-box-arrow-right"></i>
-                            Logout
+                        <a class="btn btn-outline-secondary d-flex align-items-center justify-content-center" 
+                           asp-controller="Auth" asp-action="Logout"
+                           style="color: #20274a; border-color: #20274a; background: transparent; width: 40px; height: 40px; border-radius: 50%; padding: 0;"
+                           onmouseover="this.style.backgroundColor='#20274a'; this.style.color='white';"
+                           onmouseout="this.style.backgroundColor='transparent'; this.style.color='#20274a';">
+                            <i class="bi bi-box-arrow-right" style="font-weight: bold; font-size: 18px;"></i>
                         </a>
                     </div>
                 </div>
