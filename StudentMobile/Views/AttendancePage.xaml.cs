@@ -26,7 +26,16 @@ namespace StudentMobile.Views
 
         private async void OnNotificationsClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("//Notifications");
+            try
+            {
+                var notificationsPage = new Views.NotificationsPage();
+                await Navigation.PushAsync(notificationsPage);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error navigating to notifications: {ex.Message}");
+                await DisplayAlert("Error", "Unable to open notifications", "OK");
+            }
         }
     }
 }

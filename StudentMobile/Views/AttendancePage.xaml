@@ -26,11 +26,11 @@
                                TextColor="#2C3E50"/>
                         
                         <Button Grid.Column="1" 
-                                Text="🔔" 
+                                Text="🔔 Notifications" 
                                 BackgroundColor="Transparent"
                                 TextColor="#20274a"
-                                FontSize="20"
-                                WidthRequest="40"
+                                FontSize="14"
+                                WidthRequest="120"
                                 HeightRequest="40"
                                 CornerRadius="20"
                                 Clicked="OnNotificationsClicked"
