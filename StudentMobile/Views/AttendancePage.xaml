@@ -17,11 +17,25 @@
             <!-- Header Section -->
             <Frame BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True">
                 <StackLayout Spacing="15">
-                    <Label Text="My Attendance" 
-                           FontSize="24" 
-                           FontAttributes="Bold" 
-                           HorizontalOptions="Center"
-                           TextColor="#2C3E50"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" 
+                               Text="My Attendance" 
+                               FontSize="24" 
+                               FontAttributes="Bold" 
+                               VerticalOptions="Center"
+                               TextColor="#2C3E50"/>
+                        
+                        <Button Grid.Column="1" 
+                                Text="🔔" 
+                                BackgroundColor="Transparent"
+                                TextColor="#20274a"
+                                FontSize="20"
+                                WidthRequest="40"
+                                HeightRequest="40"
+                                CornerRadius="20"
+                                Clicked="OnNotificationsClicked"
+                                VerticalOptions="Center"/>
+                    </Grid>
                     
                     <!-- Stats Summary -->
                     <Grid ColumnDefinitions="*,*,*" Padding="0,10,0,0">

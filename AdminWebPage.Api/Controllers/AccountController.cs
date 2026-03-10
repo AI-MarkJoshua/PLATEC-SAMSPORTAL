@@ -35,7 +35,7 @@ namespace AdminWebPage.Api.Controllers
             var password = loginRequest.Password.Trim();
 
             var account = await _context.Accounts
-                .FirstOrDefaultAsync(a => a.Username == username && a.Password == password);
+                .FirstOrDefaultAsync(a => a.Username.ToLower() == username.ToLower() && a.Password == password);
 
             if (account == null)
             {

@@ -8,11 +8,15 @@ namespace AdminWebPage.Controllers
     public class DashboardController : Controller
     {
         private readonly AdminWebPageContext _context;
+        private readonly HttpClient _httpClient;
 
-        public DashboardController(AdminWebPageContext context)
+        public DashboardController(AdminWebPageContext context, HttpClient httpClient)
         {
             _context = context;
+            _httpClient = httpClient;
         }
+
+        private string BaseUrl => "https://api.example.com"; // replace with your base URL
 
         public async Task<IActionResult> Index(string view = "daily")
         {

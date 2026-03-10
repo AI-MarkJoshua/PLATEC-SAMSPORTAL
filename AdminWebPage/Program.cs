@@ -10,6 +10,7 @@ builder.Services.AddDbContext<AdminWebPageContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
+builder.Services.AddHttpClient(); // Add HttpClient for DI
 
 
 var app = builder.Build();

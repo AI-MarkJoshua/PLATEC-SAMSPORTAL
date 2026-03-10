@@ -115,6 +115,17 @@ namespace AdminWebPage.Controllers
                     .ThenInclude(ts => ts.Teacher)
                 .ToListAsync();
 
+            // Filter attendance based on user role
+            if (userRole == "Teacher")
+            {
+                // Teachers only see attendance for their assigned students
+                allAttendance = allAttendance
+                    .Where(a => a.Student.TeacherID == accountId && 
+                               a.Student.SectionID.HasValue)
+                    .ToList();
+            }
+            // else: Admin sees all attendance (existing logic)
+
             // Group by date and section to create separate cards for each classroom
             var attendanceByDateAndSection = allAttendance
                 .GroupBy(a => new { 

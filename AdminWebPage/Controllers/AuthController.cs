@@ -54,7 +54,7 @@ namespace AdminWebPage.Controllers
                     
                     // Allow Admin and Teacher to login via web interface
                     HttpContext.Session.SetString("UserRole", account.Role);
-                    HttpContext.Session.SetString("Username", account.Username);
+                    HttpContext.Session.SetString("UserName", $"{account.FName} {account.LName}");
                     HttpContext.Session.SetInt32("AccountID", account.AccountID);
 
                     // Redirect based on role

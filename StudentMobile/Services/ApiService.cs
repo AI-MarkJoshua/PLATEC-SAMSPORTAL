@@ -61,13 +61,54 @@ namespace StudentMobile.Services
 
         public async Task<List<AttendanceRecord>> GetMyAttendanceAsync(int studentId)
         {
-            var response = await _httpClient.GetAsync($"{BaseUrl}attendance/mine/{studentId}");
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseUrl}attendance/mine/{studentId}");
 
-            if (!response.IsSuccessStatusCode) return new List<AttendanceRecord>();
+                if (!response.IsSuccessStatusCode) return new List<AttendanceRecord>();
 
-            var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<AttendanceRecord>>(json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<AttendanceRecord>>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting attendance: {ex.Message}");
+                return new List<AttendanceRecord>();
+            }
+        }
+
+        public async Task<List<NotificationRecord>> GetNotificationsAsync(int studentId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseUrl}notifications/student/{studentId}");
+
+                if (!response.IsSuccessStatusCode) return new List<NotificationRecord>();
+
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<NotificationRecord>>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting notifications: {ex.Message}");
+                return new List<NotificationRecord>();
+            }
+        }
+
+        public async Task<bool> MarkNotificationAsReadAsync(int notificationId)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsync($"{BaseUrl}notifications/{notificationId}/read", null);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error marking notification as read: {ex.Message}");
+                return false;
+            }
         }
     }
 }
