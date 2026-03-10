@@ -8,41 +8,36 @@
 
 <!-- SUMMARY CARDS -->
 <div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-             style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
-
-            <!-- ICON -->
-            <div class="me-3 summary-icon">
-                <i class="bi bi-people-fill"></i>
-            </div>
-
-            <!-- TEXT -->
-            <div class="text-start">
-                <h6 class="mb-1">Total Students</h6>
-                <h3 class="mb-0">@ViewBag.TotalStudents</h3>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="col-md-3">
-        <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-             style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
-
-            <div class="me-3 summary-icon">
-                <i class="bi bi-person-badge-fill"></i>
-            </div>
-
-            <div class="text-start">
-                <h6 class="mb-1">Total Teachers</h6>
-                <h3 class="mb-0">@ViewBag.TotalTeachers</h3>
-            </div>
-        </div>
-    </div>
-
     @if (userRole == "Admin")
     {
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
+
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Total Students</h6>
+                    <h3 class="mb-0">@ViewBag.TotalStudents</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
+
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Total Teachers</h6>
+                    <h3 class="mb-0">@ViewBag.TotalTeachers</h3>
+                </div>
+            </div>
+        </div>
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
                  style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
@@ -57,27 +52,6 @@
                 </div>
             </div>
         </div>
-    }
-    else
-    {
-        <div class="col-md-3">
-            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
-
-                <div class="me-3 summary-icon">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
-
-                <div class="text-start">
-                    <h6 class="mb-1">Present Today</h6>
-                    <h3 class="mb-0">@ViewBag.PresentToday</h3>
-                </div>
-            </div>
-        </div>
-    }
-
-    @if (userRole == "Admin")
-    {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
                  style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
@@ -100,6 +74,34 @@
                  style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
                 <div class="me-3 summary-icon">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Total Students</h6>
+                    <h3 class="mb-0">@ViewBag.TotalStudents</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
+
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Present Today</h6>
+                    <h3 class="mb-0">@ViewBag.PresentToday</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
+
+                <div class="me-3 summary-icon">
                     <i class="bi bi-x-circle-fill"></i>
                 </div>
 
@@ -109,8 +111,21 @@
                 </div>
             </div>
         </div>
-    }
+        <div class="col-md-3">
+            <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
+                <div class="me-3 summary-icon">
+                    <i class="bi bi-clock-fill"></i>
+                </div>
+
+                <div class="text-start">
+                    <h6 class="mb-1">Late Today</h6>
+                    <h3 class="mb-0">@ViewBag.LateToday</h3>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 <!-- ATTENDANCE CHART -->
@@ -156,26 +171,23 @@
 
 <script>
     const chartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data));
+    const userRole = '@userRole';
 
-    const labels = chartData.map(x => x.Subject);
-    const present = chartData.map(x => x.Present);
-    const absent = chartData.map(x => x.Absent);
-    const late = chartData.map(x => x.Late);
+    let labels, present, absent, late;
     
-    // Generate colors for each subject
-    const subjectColors = {
-        'Filipino': { bg: '#8B4513', border: '#654321' },
-        'Math': { bg: '#4169E1', border: '#1E90FF' },
-        'Science': { bg: '#228B22', border: '#006400' },
-        'English': { bg: '#FF6347', border: '#DC143C' },
-        'History': { bg: '#9370DB', border: '#8A2BE2' },
-        'PE': { bg: '#FF8C00', border: '#FF6347' },
-        'Art': { bg: '#FF69B4', border: '#FF1493' },
-        'Music': { bg: '#FFD700', border: '#FFA500' }
-    };
-    
-    const backgroundColors = labels.map(subject => subjectColors[subject]?.bg || '#6c757d');
-    const borderColors = labels.map(subject => subjectColors[subject]?.border || '#495057');
+    if (userRole === 'Teacher') {
+        // Teacher sees student names with separate bars
+        labels = chartData.map(x => x.StudentName);
+        present = chartData.map(x => x.Present);
+        absent = chartData.map(x => x.Absent);
+        late = chartData.map(x => x.Late);
+    } else {
+        // Admin sees subject-based data
+        labels = chartData.map(x => x.Subject);
+        present = chartData.map(x => x.Present);
+        absent = chartData.map(x => x.Absent);
+        late = chartData.map(x => x.Late);
+    }
 
     new Chart(document.getElementById('attendanceChart'), {
         type: 'bar',
@@ -241,25 +253,28 @@
                     bodyFont: { size: 12 },
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': ' + context.parsed.y + ' students';
+                            const label = context.dataset.label;
+                            const value = context.parsed.y;
+                            const unit = userRole === 'Teacher' ? ' days' : ' students';
+                            return label + ': ' + value + unit;
                         }
                     }
                 }
             },
             scales: {
                 x: { 
-                    stacked: true,
+                    stacked: userRole === 'Admin', // Only stack for admin
                     grid: { display: false }, 
                     ticks: { 
                         color: '#6c757d',
                         font: { size: 11 },
-                        maxRotation: 45,
+                        maxRotation: userRole === 'Teacher' ? 45 : 0,
                         minRotation: 0
                     } 
                 },
                 y: { 
                     beginAtZero: true,
-                    stacked: true,
+                    stacked: userRole === 'Admin', // Only stack for admin
                     grid: { 
                         color: '#f0f2f5',
                         drawBorder: false

@@ -100,15 +100,18 @@
                                 Student Report
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link d-flex align-items-center gap-3
+                        @if (userRole == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-3
            @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" &&
              ViewContext.RouteData.Values["action"]?.ToString() == "TeacherReport" ? "active" : "")"
-                               asp-controller="Attendance" asp-action="TeacherReport">
-                                <i class="bi bi-person-badge fs-5"></i>
-                                Teacher Report
-                            </a>
-                        </li>
+                                   asp-controller="Attendance" asp-action="TeacherReport">
+                                    <i class="bi bi-person-badge fs-5"></i>
+                                    Teacher Report
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </li>
             </ul>
