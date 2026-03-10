@@ -26,15 +26,16 @@
                                TextColor="#2C3E50"/>
                         
                         <Button Grid.Column="1" 
-                                Text="🔔 Notifications" 
                                 BackgroundColor="Transparent"
                                 TextColor="#20274a"
                                 FontSize="14"
-                                WidthRequest="120"
-                                HeightRequest="40"
-                                CornerRadius="20"
+                                WidthRequest="80"
+                                HeightRequest="50"
+                                CornerRadius="25"
                                 Clicked="OnNotificationsClicked"
-                                VerticalOptions="Center"/>
+                                VerticalOptions="Center"
+                                ImageSource="mka.png"
+                                ContentLayout="15,15"/>
                     </Grid>
                     
                     <!-- Stats Summary -->
