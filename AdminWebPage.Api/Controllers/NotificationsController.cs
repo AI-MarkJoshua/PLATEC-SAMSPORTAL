@@ -50,6 +50,29 @@ namespace AdminWebPage.Api.Controllers
             var notifications = new List<object>();
             var today = DateTime.Today;
 
+            // Check for today's attendance
+            var todaysAttendance = await _context.Attendances
+                .Where(a => a.StudentId == studentId && 
+                            a.Date >= today)
+                .OrderByDescending(a => a.Date)
+                .Include(a => a.Student)
+                .ThenInclude(s => s.Section)
+                .FirstOrDefaultAsync();
+
+            if (todaysAttendance != null)
+            {
+                notifications.Add(new
+                {
+                    Id = 5000 + todaysAttendance.AttendanceId,
+                    StudentId = studentId,
+                    Title = "Attendance Recorded Today",
+                    Message = $"Your teacher marked you as {todaysAttendance.Status} in {todaysAttendance.Student?.Section?.SectionName} at {todaysAttendance.Date:h:mm tt}.",
+                    Type = todaysAttendance.Status,
+                    CreatedAt = todaysAttendance.Date,
+                    IsRead = false
+                });
+            }
+
             // Check for recent absences
             var recentAbsences = await _context.Attendances
                 .Where(a => a.StudentId == studentId && 

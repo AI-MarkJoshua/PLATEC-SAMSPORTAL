@@ -12,8 +12,9 @@
         <vm:StatusToColorConverter x:Key="StatusToColorConverter"/>
     </ContentPage.Resources>
 
-    <ScrollView>
-        <StackLayout Padding="20" Spacing="20">
+    <Grid>
+        <ScrollView>
+            <StackLayout Padding="20" Spacing="20">
             <!-- Header Section -->
             <Frame BackgroundColor="White" CornerRadius="15" Padding="20" HasShadow="True">
                 <StackLayout Spacing="15">
@@ -25,17 +26,35 @@
                                VerticalOptions="Center"
                                TextColor="#2C3E50"/>
                         
-                        <Button Grid.Column="1" 
-                                BackgroundColor="Transparent"
-                                TextColor="#20274a"
-                                FontSize="14"
-                                WidthRequest="80"
-                                HeightRequest="50"
-                                CornerRadius="25"
-                                Clicked="OnNotificationsClicked"
-                                VerticalOptions="Center"
-                                ImageSource="mka.png"
-                                ContentLayout="15,15"/>
+                        <Grid Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End" WidthRequest="60" HeightRequest="60">
+                            <!-- Bell Icon (Using mka.png if bell isn't available) -->
+                            <ImageButton Source="mka.png" 
+                                         BackgroundColor="Transparent"
+                                         WidthRequest="40"
+                                         HeightRequest="40"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         Command="{Binding ToggleNotificationOverlayCommand}"/>
+                            
+                            <!-- Red Badge -->
+                            <Frame BackgroundColor="Red"
+                                   CornerRadius="12"
+                                   WidthRequest="24"
+                                   HeightRequest="24"
+                                   Padding="0"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Start"
+                                   Margin="0,2,2,0"
+                                   IsVisible="{Binding HasUnreadNotifications}"
+                                   HasShadow="False">
+                                <Label Text="{Binding UnreadNotificationCount}"
+                                       TextColor="White"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Frame>
+                        </Grid>
                     </Grid>
                     
                     <!-- Stats Summary -->
@@ -115,4 +134,52 @@
                                HeightRequest="40"/>
         </StackLayout>
     </ScrollView>
+
+        <!-- Notification Overlay -->
+        <ContentView IsVisible="{Binding IsNotificationOverlayVisible}" BackgroundColor="#80000000" VerticalOptions="Fill" HorizontalOptions="Fill">
+            <ContentView.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseNotificationOverlayCommand}" />
+            </ContentView.GestureRecognizers>
+            <Frame BackgroundColor="White" 
+                   CornerRadius="15" 
+                   Margin="20,60,20,60" 
+                   Padding="20" 
+                   VerticalOptions="Fill" 
+                   HorizontalOptions="Fill"
+                   HasShadow="True">
+                <!-- Inner Grid absorbs taps so it doesn't close when clicking inside -->
+                <Grid RowDefinitions="Auto,*">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer />
+                    </Grid.GestureRecognizers>
+                    
+                    <!-- Overlay Header -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
+                        <Label Grid.Column="0" Text="Notifications" FontSize="20" FontAttributes="Bold" TextColor="#2C3E50" VerticalOptions="Center" />
+                        <ImageButton Grid.Column="1" Source="mka.png" WidthRequest="30" HeightRequest="30" CornerRadius="15" Command="{Binding CloseNotificationOverlayCommand}" BackgroundColor="#F8F9FA" />
+                    </Grid>
+
+                    <!-- Notifications List -->
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Notifications}">
+                        <CollectionView.EmptyView>
+                            <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Margin="0,50,0,0">
+                                <Label Text="You have no notifications." TextColor="#999999" FontSize="16" HorizontalOptions="Center" />
+                            </StackLayout>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame BackgroundColor="#F8F9FA" CornerRadius="10" Padding="15" Margin="0,5" HasShadow="False">
+                                    <StackLayout Spacing="5">
+                                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="16" TextColor="#2C3E50" />
+                                        <Label Text="{Binding Message}" FontSize="14" TextColor="#666666" />
+                                        <Label Text="{Binding CreatedAt, StringFormat='{0:MMM dd, yyyy h:mm tt}'}" FontSize="12" TextColor="#999999" HorizontalOptions="End" />
+                                    </StackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Frame>
+        </ContentView>
+    </Grid>
 </ContentPage>

@@ -1,4 +1,4 @@
-﻿namespace StudentMobile
+namespace StudentMobile
 {
     public partial class App : Application
     {
@@ -6,7 +6,7 @@
         {
             InitializeComponent();
 
-            MainPage = new Views.LoginPage();
+            MainPage = new Views.SplashPage();
 
         }
     }
