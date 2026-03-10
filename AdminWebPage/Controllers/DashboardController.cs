@@ -89,21 +89,26 @@ namespace AdminWebPage.Controllers
             // 📊 ATTENDANCE CHART DATA
             var rawData = await _context.Attendances
                 .Where(a => a.Date >= startDate && a.Date <= endDate)
-                .GroupBy(a => a.Date.Date)
+                .Join(_context.Accounts, a => a.StudentId, acc => acc.AccountID, (a, acc) => new { a, acc })
+                .Join(_context.TeacherSections, x => x.acc.SectionID, ts => ts.SectionID, (x, ts) => new { x.a, x.acc, ts })
+                .Join(_context.Accounts, x => x.ts.TeacherID, teacher => teacher.AccountID, (x, teacher) => new { x.a, x.acc, x.ts, teacher })
+                .Join(_context.Sections, x => x.ts.SectionID, s => s.SectionID, (x, s) => new { x.a, x.acc, x.ts, x.teacher, s })
+                .GroupBy(x => new { x.s.SectionName, TeacherName = x.teacher.FName + " " + x.teacher.LName })
                 .Select(g => new
                 {
-                    Date = g.Key,
-                    Present = g.Count(x => x.Status == "Present"),
-                    Absent = g.Count(x => x.Status == "Absent"),
-                    Late = g.Count(x => x.Status == "Late")
+                    Subject = g.Key.SectionName,
+                    Teacher = g.Key.TeacherName,
+                    Present = g.Count(x => x.a.Status == "Present"),
+                    Absent = g.Count(x => x.a.Status == "Absent"),
+                    Late = g.Count(x => x.a.Status == "Late")
                 })
-                .OrderBy(x => x.Date)
+                .OrderBy(x => x.Subject)
                 .ToListAsync();
 
             // 📊 FORMAT IN MEMORY
             var chartData = rawData.Select(x => new
             {
-                Date = x.Date.ToString("MMM dd"),
+                Subject = x.Subject,
                 x.Present,
                 x.Absent,
                 x.Late

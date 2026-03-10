@@ -10,7 +10,7 @@
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-             style="--accent-color:#9579e1; --accent-color-light:#b49ee7;">
+             style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
             <!-- ICON -->
             <div class="me-3 summary-icon">
@@ -28,7 +28,7 @@
 
     <div class="col-md-3">
         <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-             style="--accent-color:#3667c7; --accent-color-light:#3d8ef7;">
+             style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
             <div class="me-3 summary-icon">
                 <i class="bi bi-person-badge-fill"></i>
@@ -45,7 +45,7 @@
     {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color:#23563c; --accent-color-light:#297443;">
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
                 <div class="me-3 summary-icon">
                     <i class="bi bi-book-fill"></i>
@@ -62,7 +62,7 @@
     {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color:#1f9e4b; --accent-color-light:#54d261;">
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
                 <div class="me-3 summary-icon">
                     <i class="bi bi-check-circle-fill"></i>
@@ -80,7 +80,7 @@
     {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color:#dd6c0a; --accent-color-light:#f57200;">
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
                 <div class="me-3 summary-icon">
                     <i class="bi bi-clipboard-data-fill"></i>
@@ -97,7 +97,7 @@
     {
         <div class="col-md-3">
             <div class="card summary-card p-3 shadow-sm d-flex flex-row align-items-center"
-                 style="--accent-color:#f55e5f; --accent-color-light:#f78485;">
+                 style="--accent-color: #20274a; --accent-color-light: #6b7aa1;">
 
                 <div class="me-3 summary-icon">
                     <i class="bi bi-x-circle-fill"></i>
@@ -117,9 +117,27 @@
 <div class="card chart-card shadow-sm p-4" style="max-height: 350px;">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0 fw-bold">Attendance Overview</h5>
+        <span class="fw-bold position-absolute start-50 translate-middle-x" style="font-size: 14px; color: #20274a;">
+            @if (ViewBag.ViewType == "weekly")
+            {
+                var weekStart = DateTime.Today.AddDays(-6);
+                var weekEnd = DateTime.Today;
+                @:@weekStart.ToString("MMM dd") - @weekEnd.ToString("MMM dd, yyyy")
+            }
+            else
+            {
+                @:@DateTime.Today.ToString("MMMM dd, yyyy")
+            }
+        </span>
         <div class="btn-group btn-group-sm" role="group">
-            <a class="btn btn-outline-primary" href="?view=daily">Daily</a>
-            <a class="btn btn-outline-secondary" href="?view=weekly">Weekly</a>
+            <a class="btn btn-outline-primary @(ViewBag.ViewType == "daily" ? "active-view" : "")" href="?view=daily" 
+               style="color: #e2c388; border-color: #e2c388; @(ViewBag.ViewType == "daily" ? "background-color: #e2c388; color: white;" : "")"
+               onmouseover="this.style.backgroundColor='#e2c388'; this.style.color='white';"
+               onmouseout="@(ViewBag.ViewType == "daily" ? "" : "this.style.backgroundColor='transparent'; this.style.color='#e2c388';")">Daily</a>
+            <a class="btn btn-outline-secondary @(ViewBag.ViewType == "weekly" ? "active-view" : "")" href="?view=weekly" 
+               style="color: #e2c388; border-color: #e2c388; @(ViewBag.ViewType == "weekly" ? "background-color: #e2c388; color: white;" : "")"
+               onmouseover="this.style.backgroundColor='#e2c388'; this.style.color='white';"
+               onmouseout="@(ViewBag.ViewType == "weekly" ? "" : "this.style.backgroundColor='transparent'; this.style.color='#e2c388';")">Weekly</a>
         </div>
     </div>
     <div style="height: 250px; position: relative;">
@@ -127,15 +145,37 @@
     </div>
 </div>
 
+<style>
+.active-view {
+    background-color: #e2c388 !important;
+    color: white !important;
+}
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     const chartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(data));
 
-    const labels = chartData.map(x => x.Date);
+    const labels = chartData.map(x => x.Subject);
     const present = chartData.map(x => x.Present);
     const absent = chartData.map(x => x.Absent);
     const late = chartData.map(x => x.Late);
+    
+    // Generate colors for each subject
+    const subjectColors = {
+        'Filipino': { bg: '#8B4513', border: '#654321' },
+        'Math': { bg: '#4169E1', border: '#1E90FF' },
+        'Science': { bg: '#228B22', border: '#006400' },
+        'English': { bg: '#FF6347', border: '#DC143C' },
+        'History': { bg: '#9370DB', border: '#8A2BE2' },
+        'PE': { bg: '#FF8C00', border: '#FF6347' },
+        'Art': { bg: '#FF69B4', border: '#FF1493' },
+        'Music': { bg: '#FFD700', border: '#FFA500' }
+    };
+    
+    const backgroundColors = labels.map(subject => subjectColors[subject]?.bg || '#6c757d');
+    const borderColors = labels.map(subject => subjectColors[subject]?.border || '#495057');
 
     new Chart(document.getElementById('attendanceChart'), {
         type: 'bar',
@@ -145,32 +185,32 @@
                 { 
                     label:'Present', 
                     data: present, 
-                    backgroundColor: '#1f9e4b',
-                    borderColor: '#1a7d3d',
+                    backgroundColor: '#6b7aa1', // Lighter shade of #20274a
+                    borderColor: '#5a6a91',
                     borderWidth: 1,
                     borderRadius: 6,
                     barThickness: 'flex',
-                    maxBarThickness: 40
+                    maxBarThickness: 25
                 },
                 { 
                     label:'Absent', 
                     data: absent, 
-                    backgroundColor: '#f55e5f',
-                    borderColor: '#d64546',
+                    backgroundColor: '#20274a', // Dark color
+                    borderColor: '#1a1f3a',
                     borderWidth: 1,
                     borderRadius: 6,
                     barThickness: 'flex',
-                    maxBarThickness: 40
+                    maxBarThickness: 25
                 },
                 { 
                     label:'Late', 
                     data: late, 
-                    backgroundColor: '#ffc107',
-                    borderColor: '#e0a800',
+                    backgroundColor: '#e2c388', // Yellow-ish
+                    borderColor: '#d4b374',
                     borderWidth: 1,
                     borderRadius: 6,
                     barThickness: 'flex',
-                    maxBarThickness: 40
+                    maxBarThickness: 25
                 }
             ]
         },
@@ -208,6 +248,7 @@
             },
             scales: {
                 x: { 
+                    stacked: true,
                     grid: { display: false }, 
                     ticks: { 
                         color: '#6c757d',
@@ -217,7 +258,8 @@
                     } 
                 },
                 y: { 
-                    beginAtZero: true, 
+                    beginAtZero: true,
+                    stacked: true,
                     grid: { 
                         color: '#f0f2f5',
                         drawBorder: false
@@ -227,7 +269,7 @@
                         font: { size: 11 },
                         stepSize: 1,
                         precision: 0
-                    }
+                    } 
                 }
             },
             interaction: {
