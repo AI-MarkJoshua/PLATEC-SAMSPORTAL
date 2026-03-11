@@ -41,9 +41,29 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     
-                    <Frame Grid.Row="0" 
+                    <!-- Heading -->
+                    <Label Grid.Row="0" 
+                           Text="Login Your Account" 
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#181F49"
+                           HorizontalOptions="Center"
+                           Margin="0,0,0,5"/>
+                    
+                    <!-- Subheading -->
+                    <Label Grid.Row="1" 
+                           Text="Intended for authorized student" 
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                           Margin="0,0,0,20"/>
+                    
+                    <Frame Grid.Row="2" 
                            BackgroundColor="White" 
                            BorderColor="#E0E0E0" 
                            CornerRadius="20" 
@@ -57,7 +77,7 @@
                                BackgroundColor="Transparent"/>
                     </Frame>
                     
-                    <Frame Grid.Row="1" 
+                    <Frame Grid.Row="3" 
                            BackgroundColor="White" 
                            BorderColor="#E0E0E0" 
                            CornerRadius="20" 
@@ -71,7 +91,7 @@
                                BackgroundColor="Transparent"/>
                     </Frame>
                     
-                    <Button Grid.Row="2" 
+                    <Button Grid.Row="4" 
                             Text="Forgot Password?" 
                             BackgroundColor="Transparent"
                             TextColor="Blue"
@@ -79,7 +99,7 @@
                             Margin="0,5,0,0"
                             Clicked="OnForgotPasswordClicked"/>
                     
-                    <Button Grid.Row="2" 
+                    <Button Grid.Row="5" 
                             Text="Login" 
                             BackgroundColor="#181F49"
                             TextColor="White"
