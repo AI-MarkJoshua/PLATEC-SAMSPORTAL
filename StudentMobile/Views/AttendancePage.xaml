@@ -26,40 +26,50 @@
                 <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                     <Label Grid.Column="0" 
                            Text="My Attendance" 
-                           FontSize="18" 
+                           FontSize="16" 
                            FontAttributes="Bold" 
                            VerticalOptions="Center"
                            TextColor="White"/>
                     
-                    <Grid Grid.Column="1" VerticalOptions="Center" HorizontalOptions="End" WidthRequest="60" HeightRequest="60">
-                        <!-- Bell Icon -->
-                        <ImageButton Source="mka.png" 
-                                     BackgroundColor="Transparent"
-                                     WidthRequest="30"
-                                     HeightRequest="30"
-                                     VerticalOptions="Center"
-                                     HorizontalOptions="Center"
-                                     Command="{Binding ToggleNotificationOverlayCommand}"/>
+                    <StackLayout Grid.Column="1" Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="End" Spacing="10">
+                        <!-- Student Name -->
+                        <Label Text="{Binding StudentName}" 
+                               FontSize="14" 
+                               FontAttributes="Bold"
+                               TextColor="#F0F0F0"
+                               VerticalOptions="Center"/>
                         
-                        <!-- Red Badge -->
-                        <Frame BackgroundColor="Red"
-                               CornerRadius="8"
-                               WidthRequest="18"
-                               HeightRequest="18"
-                               Padding="0"
-                               HorizontalOptions="End"
-                               VerticalOptions="Start"
-                               Margin="0,2,2,0"
-                               IsVisible="{Binding HasUnreadNotifications}"
-                               HasShadow="False">
-                            <Label Text="{Binding UnreadNotificationCount}"
-                                   TextColor="White"
-                                   FontSize="10"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center"/>
-                        </Frame>
-                    </Grid>
+                        <!-- Notification Icon -->
+                        <Grid WidthRequest="60" HeightRequest="60">
+                            <!-- Bell Icon -->
+                            <ImageButton Source="mka.png" 
+                                         BackgroundColor="Transparent"
+                                         WidthRequest="30"
+                                         HeightRequest="30"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"
+                                         Command="{Binding ToggleNotificationOverlayCommand}"/>
+                            
+                            <!-- Red Badge -->
+                            <Frame BackgroundColor="Red"
+                                   CornerRadius="8"
+                                   WidthRequest="18"
+                                   HeightRequest="18"
+                                   Padding="0"
+                                   HorizontalOptions="End"
+                                   VerticalOptions="Start"
+                                   Margin="0,2,2,0"
+                                   IsVisible="{Binding HasUnreadNotifications}"
+                                   HasShadow="False">
+                                <Label Text="{Binding UnreadNotificationCount}"
+                                       TextColor="White"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                            </Frame>
+                        </Grid>
+                    </StackLayout>
                 </Grid>
                 
                 <!-- Stats Summary -->
@@ -94,7 +104,7 @@
                     <Frame BackgroundColor="White" CornerRadius="15" HasShadow="True" Margin="0,20,0,0">
                         <StackLayout Spacing="15">
                             <Label Text="Attendance History" 
-                                   FontSize="14" 
+                                   FontSize="12" 
                                    FontAttributes="Bold" 
                                    TextColor="#2C3E50"
                                    Margin="0,0,0,5"/>
@@ -179,9 +189,9 @@
                 <TapGestureRecognizer Command="{Binding CloseNotificationOverlayCommand}" />
             </ContentView.GestureRecognizers>
             <Frame BackgroundColor="White" 
-                   CornerRadius="15" 
-                   Margin="20,60,20,60" 
-                   Padding="20" 
+                   CornerRadius="20" 
+                   Margin="25,80,25,80" 
+                   Padding="0" 
                    VerticalOptions="Fill" 
                    HorizontalOptions="Fill"
                    HasShadow="True">
@@ -191,31 +201,92 @@
                         <TapGestureRecognizer />
                     </Grid.GestureRecognizers>
                     
-                    <!-- Overlay Header -->
-                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,15">
-                        <Label Grid.Column="0" Text="Notifications" FontSize="20" FontAttributes="Bold" TextColor="#2C3E50" VerticalOptions="Center" />
-                        <ImageButton Grid.Column="1" Source="mka.png" WidthRequest="30" HeightRequest="30" CornerRadius="15" Command="{Binding CloseNotificationOverlayCommand}" BackgroundColor="#F8F9FA" />
+                    <!-- Blue Background Header with Enhanced Design -->
+                    <Grid Grid.Row="0" HeightRequest="80">
+                        <BoxView BackgroundColor="#181F49" 
+                                 VerticalOptions="Fill" 
+                                 HorizontalOptions="Fill"/>
+                        
+                        <!-- Header Content -->
+                        <Grid ColumnDefinitions="*,Auto" Margin="25,0" VerticalOptions="Center">
+                            <StackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="Notifications" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                                <Label Text="{Binding UnreadNotificationCount, StringFormat='You have {0} new notifications'}" 
+                                       FontSize="12" TextColor="#B0BEC5" IsVisible="{Binding HasUnreadNotifications}"/>
+                            </StackLayout>
+                            
+                            <Frame Grid.Column="1" 
+                                   BackgroundColor="White" 
+                                   CornerRadius="25" 
+                                   WidthRequest="50" 
+                                   HeightRequest="50" 
+                                   Padding="8"
+                                   HasShadow="True">
+                                <Image Source="mka.png" 
+                                      Aspect="AspectFit" 
+                                      HorizontalOptions="Center" 
+                                      VerticalOptions="Center">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CloseNotificationOverlayCommand}" />
+                                    </Image.GestureRecognizers>
+                                </Image>
+                            </Frame>
+                        </Grid>
                     </Grid>
 
-                    <!-- Notifications List -->
-                    <CollectionView Grid.Row="1" ItemsSource="{Binding Notifications}">
-                        <CollectionView.EmptyView>
-                            <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Margin="0,50,0,0">
-                                <Label Text="You have no notifications." TextColor="#999999" FontSize="16" HorizontalOptions="Center" />
-                            </StackLayout>
-                        </CollectionView.EmptyView>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame BackgroundColor="#F8F9FA" CornerRadius="10" Padding="15" Margin="0,5" HasShadow="False">
-                                    <StackLayout Spacing="5">
-                                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="16" TextColor="#2C3E50" />
-                                        <Label Text="{Binding Message}" FontSize="14" TextColor="#666666" />
-                                        <Label Text="{Binding CreatedAt, StringFormat='{0:MMM dd, yyyy h:mm tt}'}" FontSize="12" TextColor="#999999" HorizontalOptions="End" />
-                                    </StackLayout>
-                                </Frame>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+                    <!-- Notifications List with Clean Design -->
+                    <ScrollView Grid.Row="1">
+                        <CollectionView ItemsSource="{Binding Notifications}" Margin="20,20,20,20">
+                            <CollectionView.EmptyView>
+                                <StackLayout VerticalOptions="Center" HorizontalOptions="Center" Margin="0,50,0,50">
+                                    <Frame BackgroundColor="#F5F7FA" CornerRadius="50" Padding="20" WidthRequest="80" HeightRequest="80" HasShadow="False">
+                                        <Label Text="📬" FontSize="30" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Frame>
+                                    <Label Text="No notifications yet" TextColor="#64748B" FontSize="16" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,10,0,5"/>
+                                    <Label Text="You'll see your notifications here" TextColor="#94A3B8" FontSize="14" HorizontalOptions="Center"/>
+                                </StackLayout>
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Frame BackgroundColor="#F8FAFB" 
+                                           CornerRadius="12" 
+                                           Padding="18" 
+                                           Margin="0,8" 
+                                           HasShadow="True"
+                                           BorderColor="#E2E8F0">
+                                        <StackLayout Spacing="8">
+                                            <!-- Title and Date -->
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0"
+                                                       Text="{Binding Title}" 
+                                                       FontAttributes="Bold" 
+                                                       FontSize="16" 
+                                                       TextColor="#1E293B" 
+                                                       HorizontalOptions="StartAndExpand"/>
+                                                <Label Grid.Column="1"
+                                                       Text="{Binding CreatedAt, StringFormat='{0:MMM dd, yyyy}'}" 
+                                                       FontSize="12" 
+                                                       TextColor="#94A3B8" 
+                                                       VerticalOptions="Center"/>
+                                            </Grid>
+                                            
+                                            <!-- Message -->
+                                            <Label Text="{Binding Message}" 
+                                                   FontSize="14" 
+                                                   TextColor="#475569" 
+                                                   LineBreakMode="WordWrap"/>
+                                            
+                                            <!-- Time -->
+                                            <Label Text="{Binding CreatedAt, StringFormat='{0:h:mm tt}'}" 
+                                                   FontSize="11" 
+                                                   TextColor="#94A3B8" 
+                                                   HorizontalOptions="End"/>
+                                        </StackLayout>
+                                    </Frame>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </ScrollView>
                 </Grid>
             </Frame>
         </ContentView>

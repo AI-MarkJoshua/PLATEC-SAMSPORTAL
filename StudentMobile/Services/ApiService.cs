@@ -78,6 +78,25 @@ namespace StudentMobile.Services
             }
         }
 
+        public async Task<Student?> GetStudentDetailsAsync(int studentId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseUrl}account/{studentId}");
+
+                if (!response.IsSuccessStatusCode) return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<Student>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting student details: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<List<NotificationRecord>> GetNotificationsAsync(int studentId)
         {
             try

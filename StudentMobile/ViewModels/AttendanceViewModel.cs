@@ -39,6 +39,9 @@ namespace StudentMobile.ViewModels
         [ObservableProperty]
         private ObservableCollection<NotificationRecord> notifications = new();
 
+        [ObservableProperty]
+        private string studentName = string.Empty;
+
         private readonly NotificationService _notificationService;
 
         public AttendanceViewModel()
@@ -57,7 +60,14 @@ namespace StudentMobile.ViewModels
                 if (Preferences.ContainsKey("StudentId"))
                 {
                     int studentId = Preferences.Get("StudentId", 0);
-                    System.Diagnostics.Debug.WriteLine($"Loading attendance for StudentId: {studentId}");
+                    
+                    // Get student name from preferences
+                    if (Preferences.ContainsKey("StudentName"))
+                    {
+                        StudentName = Preferences.Get("StudentName", "");
+                    }
+                    
+                    System.Diagnostics.Debug.WriteLine($"Loading attendance for StudentId: {studentId}, StudentName: {StudentName}");
                     
                     AttendanceRecords = await _apiService.GetMyAttendanceAsync(studentId);
                     

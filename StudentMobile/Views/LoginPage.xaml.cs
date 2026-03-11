@@ -47,9 +47,13 @@ public partial class LoginPage : ContentPage
             {
                 if (result.Role == "Student")
                 {
-                    // Save student ID using Preferences
+                    // Save student information using Preferences
                     Preferences.Set("StudentId", result.AccountID);
-
+                    
+                    // Use full name from login response (no need for separate API call)
+                    string fullName = $"{result.FName} {result.LName}";
+                    Preferences.Set("StudentName", fullName);
+                    
                     // Show success message
                     await ShowMessageOverlay("Login successful!", "success_icon.svg", 3000);
 
