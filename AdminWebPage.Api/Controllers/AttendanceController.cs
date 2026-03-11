@@ -22,11 +22,26 @@ namespace AdminWebPage.Api.Controllers
         {
             var attendance = await _context.Attendances
                 .Where(a => a.StudentId == studentId)
-                .Select(a => new
+                .Join(_context.Accounts, 
+                    a => a.StudentId, 
+                    s => s.AccountID, 
+                    (a, s) => new { a, s })
+                .Join(_context.Accounts, 
+                    as_join => as_join.s.TeacherID, 
+                    t => t.AccountID, 
+                    (as_join, t) => new { as_join.a, Student = as_join.s, Teacher = t })
+                .Join(_context.Sections,
+                    ats => ats.Student.SectionID,
+                    sec => sec.SectionID,
+                    (ats, sec) => new { ats.a, ats.Student, ats.Teacher, Section = sec })
+                .Select(x => new
                 {
-                    a.Date,
-                    a.Status
+                    x.a.Date,
+                    x.a.Status,
+                    Subject = x.Section.SectionName,
+                    TeacherName = x.Teacher.FName + " " + x.Teacher.LName
                 })
+                .OrderByDescending(x => x.Date)
                 .ToListAsync();
 
             return Ok(attendance);
